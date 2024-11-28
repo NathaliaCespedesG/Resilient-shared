@@ -6,12 +6,13 @@ import { NgModel, ValidatorFn } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ICONS } from '@shared/constants/icons';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ConfirmationService } from 'primeng/api';
+import { ConfirmationService, MenuItem } from 'primeng/api';
 import { EnvService } from 'src/app/services/env.service';
 import { ChartField, DeviceField, DeviceType } from '@shared/models/app-config';
 import { UIUtilsService } from 'src/app/services/ui-utils.service';
 import { CsvService } from 'src/app/services/csv.service';
 import { LocalStorageService } from '@app/services/local-storage.service';
+import { DataStorageService } from '@app/services/data-storage.service';
 
 @Component({
   selector: 'app-participants',
@@ -44,7 +45,7 @@ export class ParticipantsComponent implements OnInit {
   showSpinner: boolean = false;
   username: string;
   usernameFilter: string = '';
-  withingsAuthURL: string = ''
+  withingsAuthURL: string = '';
   chartFields: ChartField;
   chartVisualizationOptions: any[] = [
     {label: 'Last Week', value: 'last_week'},
@@ -59,6 +60,20 @@ export class ParticipantsComponent implements OnInit {
   ]
   defaultVisualizationOption: string = 'all_time';
   defaultDataVisualizationOption: string = 'graph';
+  reportTypes: MenuItem[] = [
+    {
+      label: 'Weekly',
+      command: () => {
+        this.generateReport('one');
+      }
+    },
+    {
+      label: 'Aggregated',
+      command: () => {
+        this.generateReport('all');
+      }
+    }
+  ]
   @ViewChild('usernameInput', { static: false }) usernameInput?: NgModel;
 
   selectedColumns: any[] = [];
@@ -66,6 +81,7 @@ export class ParticipantsComponent implements OnInit {
 
   constructor(
     private _requestsService: RequestsService,
+    private _dataStorageService: DataStorageService,
     private _envService: EnvService,
     private _uiUtilsService: UIUtilsService,
     private _csvService: CsvService,
@@ -97,6 +113,7 @@ export class ParticipantsComponent implements OnInit {
 
     this.chartFields = this._envService.appConfig.chartFields;
     this.nullReplaceValue = this._envService.appConfig.nullReplaceValue;
+    this.withingsAuthURL = this._envService.appConfig.withingsAuthUrl;
   }
 
   ngOnInit(): void {
@@ -112,18 +129,13 @@ export class ParticipantsComponent implements OnInit {
   }
 
   getUsers(): void{
-    this._requestsService.getUsers().subscribe({
-      next: (answer: Users) => {
-        if (answer) {
-          const usersArray: User[] = Object.values(answer.users);
-          this.participants = usersArray.filter( user => {
-            const role = user['role'].toLowerCase();
-            const active = user['active'];
-            return role !== 'admin' && role !== 'clinician' && role != 'super_admin' && active;
-
-          });
-          this.filteredParticipants = this.participants;
-        }
+    this._dataStorageService.getUsers().subscribe({
+      next: (filteredUsers: User[]) => {
+        this.participants = filteredUsers;
+        this.filteredParticipants = filteredUsers;
+      },
+      error: (err) => {
+        console.error('Error fetching users:', err);
       }
     });
   }
@@ -481,6 +493,20 @@ export class ParticipantsComponent implements OnInit {
   closeParticipants() {
     //Go to /dashboard
     this._router.navigate(['/dashboard']);
+  }
+
+  generateReport(reportType: string) {
+    console.log(this.participantData);
+
+    this._router.navigate(
+      ['/dashboard/reports'],
+      {
+        queryParams: {
+          username: this.participantData.username,
+          report_type: reportType
+        }
+      }
+    )
   }
 
 }

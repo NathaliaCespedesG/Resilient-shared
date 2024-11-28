@@ -50,6 +50,7 @@ class Devices_OAuth2flow(object):
         self.client_id = client_id
         self.costumer_secret = costumer_secret
         self.callback_uri = callback_uri
+        self.create_auth_url()
         
         #Create CVS database
         self.database = database.General(db_type = None)
@@ -1247,6 +1248,12 @@ class Devices_OAuth2flow(object):
 
     def save_credentials(self, credentials: CredentialsType) -> None:
         """Save credentials to a file."""
+        # Ensure the parent directory exists
+        parent_dir = os.path.dirname(self.CREDENTIALS_FILE)
+        if not os.path.exists(parent_dir):
+            print(f"Creating parent directory: {parent_dir}")
+            os.makedirs(parent_dir, exist_ok=True)
+            
         print("Saving credentials in:", self.CREDENTIALS_FILE)
         with open(self.CREDENTIALS_FILE, "wb") as file_handle:
             pickle.dump(credentials, file_handle)

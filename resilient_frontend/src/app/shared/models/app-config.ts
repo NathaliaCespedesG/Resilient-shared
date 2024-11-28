@@ -17,4 +17,5 @@ export interface AppConfig {
   apiUrl: string;
   chartFields: ChartField;
   nullReplaceValue: number;
+  withingsAuthUrl: string;
 }

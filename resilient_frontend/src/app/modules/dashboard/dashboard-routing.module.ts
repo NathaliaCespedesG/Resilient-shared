@@ -5,6 +5,7 @@ import { ParticipantsComponent } from './components/participants/participants.co
 import { ReportsComponent } from './components/reports/reports.component';
 import { DevicesComponent } from './components/devices/devices.component';
 import { ParticipantSummaryComponent } from './components/participant-summary/participant-summary.component';
+import { QuestionnaireComponent } from './components/questionnaire/questionnaire.component';
 
 const dashboardRroutes: Routes = [
   {
@@ -16,6 +17,7 @@ const dashboardRroutes: Routes = [
      { path: 'participant-summary', component: ParticipantSummaryComponent },
      { path: 'reports', component: ReportsComponent },
      { path: 'devices', component: DevicesComponent },
+     { path: 'questionnaire', component: QuestionnaireComponent },
       // { path: 'sign-up', component: SignUpComponent },
       { path: '**', redirectTo: '', pathMatch: 'full' },
     ],

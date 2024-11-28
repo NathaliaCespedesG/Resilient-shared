@@ -25,3 +25,8 @@ export interface Device {
 export interface Devices {
   devices: Devices[];
 }
+
+export interface ReportType {
+  reportType: string;
+  value: string;
+}

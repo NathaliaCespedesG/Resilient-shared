@@ -66,4 +66,17 @@ export class RequestsService {
     return this.http.post<any>(reqUrl, participantWithingsData);
   }
 
+  getReports(): Observable<any> {
+    const reportsUrl = this.baseUrl + 'reports/';
+
+    return this.http.get<any>(reportsUrl);
+  }
+
+  generateReport(username: string, reportType: string): Observable<Blob> {
+    const reportsUrl = this.baseUrl + 'reports/generate/?username=' + username + '&report_type=' + reportType;
+
+    return this.http.get<Blob>(reportsUrl, { responseType: 'blob' as 'json' });
+  }
+
+
 }

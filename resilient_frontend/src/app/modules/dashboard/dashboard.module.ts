@@ -9,6 +9,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ParticipantSummaryComponent } from './components/participant-summary/participant-summary.component';
 import { SharedModule } from './../../shared/shared.module';
 import { MessageService } from 'primeng/api';
+import { QuestionnaireComponent } from './components/questionnaire/questionnaire.component';
 
 
 @NgModule({
@@ -18,6 +19,7 @@ import { MessageService } from 'primeng/api';
     ReportsComponent,
     DevicesComponent,
     ParticipantSummaryComponent,
+    QuestionnaireComponent,
   ],
   imports: [
     CommonModule,

@@ -225,6 +225,7 @@
 
     </ng-template>
 
+    <p-confirmDialog styleClass="confirm-dialog" />
     <ng-template pTemplate="footer">
       <p-button
         styleClass="edit-button"
@@ -234,7 +235,6 @@
         <i class="pi pi-user-edit m-auto lg:m-0"></i>
         <span class="hidden lg:inline-block ml-2 w-full">Edit Participant</span>
       </p-button>
-      <p-confirmDialog styleClass="confirm-dialog" />
       <p-button
         styleClass="delete-button"
         class="flex items-center justify-center"
@@ -243,14 +243,23 @@
         <i class="pi pi-trash m-auto lg:m-0"></i>
         <span class="hidden lg:inline-block ml-2 w-full">Delete Participant</span>
       </p-button>
-      <p-button
+      <p-splitButton
+        label="Generate Report"
+        icon="pi pi-file-pdf"
+        (onClick)="generateReport('one')"
+        [model]="reportTypes"
+        styleClass="generate-button"
+      >
+      </p-splitButton>
+
+      <!-- <p-button
         styleClass="generate-button"
         class="flex items-center justify-center"
-        (onClick)="showAddParticipantModal()"
+        (onClick)="generateReport()"
       >
         <i class="pi pi-file-pdf m-auto lg:m-0"></i>
         <span class="hidden lg:inline-block ml-2 w-full">Generate Report</span>
-      </p-button>
+      </p-button> -->
     </ng-template>
 
   </p-dialog>

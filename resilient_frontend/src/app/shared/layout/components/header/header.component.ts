@@ -14,6 +14,7 @@ export class HeaderComponent {
   ){}
 
   onClickSignIn(): void {
+    this.userSignedIn = true;
     this._router.navigate(['auth']);
   }
 }

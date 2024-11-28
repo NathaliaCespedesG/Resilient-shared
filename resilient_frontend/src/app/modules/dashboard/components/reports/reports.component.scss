@@ -19,6 +19,13 @@
   font-size: 1rem !important;
 }
 
+
+.dashboard-option-body {
+  overflow: auto;
+  flex-shrink: 0;
+  height: 53dvh;
+}
+
 ::ng-deep.add-participant-button {
   height: 44px;
   justify-content: space-between;
@@ -91,4 +98,57 @@
 
 ::ng-deep.p-sortable-column-icon {
   color: white;
+}
+
+.dashboard-option-title {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0;
+  width: 100%;
+}
+
+.dashboard-option-header{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: -1rem;
+}
+
+::ng-deep.p-dropdown {
+  width: 15vw;
+
+  @media (min-width: 1024px) {
+     width: 30vw;;
+  }
+}
+
+::ng-deep.confirm-dialog .p-dialog-header{
+  padding-bottom: 2vh !important;
+}
+
+
+::ng-deep.confirm-dialog .p-dialog-content{
+  padding-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 2vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  span {
+    margin: 0 !important;
+  }
+}
+
+::ng-deep.p-datatable thead > tr > th {
+  background-color: black;
+  color: white;
+  max-width: 15vw;
+  min-width: 10vw;
+  text-wrap: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }

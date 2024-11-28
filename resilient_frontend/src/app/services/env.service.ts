@@ -12,6 +12,7 @@ export class EnvService {
       scale: [],
     },
     nullReplaceValue: 0,
+    withingsAuthUrl: ''
   };
 
   constructor() {

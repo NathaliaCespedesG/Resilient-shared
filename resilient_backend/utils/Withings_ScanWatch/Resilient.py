@@ -10,7 +10,7 @@ import utils.Withings_ScanWatch.db.database as database
 import utils.Withings_ScanWatch.db.database_django as database_api
 import utils.Withings_ScanWatch.Devices_OAuth2flow as reports
 import utils.Withings_ScanWatch.resources.PDF_usage_generation as usage_pdf
-import utils.Withings_ScanWatch.versions.withings_acquisition_v1 as reports
+import utils.Withings_ScanWatch.versions.withings_acquisition_v1 as reports_v1
 import utils.Withings_ScanWatch.versions.withings_acquisition_v2 as reports_v2
 
 class Resilient(object):
@@ -46,7 +46,7 @@ class Resilient(object):
 
     def run_reports_version(self,id_report):
         if self.version == "v1":
-            self.reports_resilient = reports.Devices_OAuth2flow(client_id = self.__client_id, 
+            self.reports_resilient = reports_v1.Devices_OAuth2flow(client_id = self.__client_id, 
 		                            costumer_secret = self.__costumer_secret,
 		                            callback_uri = self.__callback_url,
                                     report_type = 0,
@@ -121,7 +121,6 @@ class Resilient(object):
         return(usernames)
 
     def run_all_participants(self):
-
         if self.id_available is not None:
             print(self.id_available)
             total_participants = len(self.id_available)

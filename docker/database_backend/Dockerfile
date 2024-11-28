@@ -8,12 +8,12 @@ WORKDIR /app
 RUN mkdir -p /usr/share/fonts/truetype/msttcorefonts
 COPY ./docker/database_backend/fonts/* /usr/share/fonts/truetype/msttcorefonts
 
-COPY ./database_backend/api /app/api
-COPY ./database_backend/reports /app/reports
-COPY ./database_backend/utils /app/utils
-COPY ./database_backend/config /app/config
-COPY ./database_backend/manage.py /app/manage.py
-COPY ./database_backend/requirements.txt /app/requirements.txt
+COPY ./resilient_backend/api /app/api
+COPY ./resilient_backend/reports /app/reports
+COPY ./resilient_backend/utils /app/utils
+COPY ./resilient_backend/config /app/config
+COPY ./resilient_backend/manage.py /app/manage.py
+COPY ./requirements.txt /app/requirements.txt
 COPY ./python_withings_api /app/python_withings_api
 
 # Install dependencies

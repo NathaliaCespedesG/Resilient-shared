@@ -301,13 +301,23 @@
   background-color: rgb(29, 29, 29);
 }
 
-::ng-deep.generate-button {
+::ng-deep.p-splitbutton .p-button {
   font-weight: bold;
   height: 44px;
-  border-radius: 0.75rem;
+  border-top-left-radius: 0.75rem;
+  border-bottom-left-radius: 0.75rem;
   background-color: rgb(37, 46, 201);
-  width: 18vw;
-  padding: 0 1.25rem 0 1.25rem;
+  width: 16vw;
+  padding: 0 1rem 0 1rem;
+}
+
+::ng-deep.p-splitbutton > .p-splitbutton-menubutton {
+  padding: 0 0.25rem 0 0.25rem;
+  width: 3vw;
+  border-top-right-radius: 0.75rem;
+  border-bottom-right-radius: 0.75rem;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
 }
 
 ::ng-deep.generate-button:active {

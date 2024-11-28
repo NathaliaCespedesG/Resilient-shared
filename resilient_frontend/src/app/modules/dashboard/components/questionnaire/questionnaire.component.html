@@ -1,0 +1,103 @@
+<div class="dashboard-option-wrapper animate-fade-in animate-delay-300">
+  <div class="dashboard-option-title">
+    <h1 class="w-full text-center">Questionnaire</h1>
+    <i class="p-link button pi pi-times" (click)="closeQuestionnaire()"></i>
+  </div>
+
+  <!--Participants table-->
+  <div class="dashboard-option-body h-full w-full">
+    <div class="container">
+      <!-- Question to determine GP or Participant -->
+      <div class="field">
+        <label for="userType">Are you a GP or Participant?</label>
+        <p-dropdown
+          [options]="userTypes"
+          [(ngModel)]="selectedUserType"
+          optionLabel="label"
+          placeholder="Select User Type"
+          (onChange)="onUserTypeChange($event)"
+        ></p-dropdown>
+      </div>
+
+      <ng-container *ngIf="selectedUserType == 'GP'">
+        <h3>Appendix 1 (For GPs):</h3>
+
+        <!-- GP Q1 -->
+        <div class="field">
+          <label>Q1: What aspects of quality care did our reports improve?</label>
+          <p-multiSelect
+            [options]="gpQualityCareOptions"
+            [(ngModel)]="selectedGpQualityCare"
+            defaultLabel="Select options"
+          ></p-multiSelect>
+        </div>
+
+        <!-- GP Q2 -->
+        <div class="field">
+          <label>Q2: How did the platform enhance your consultation efficiency?</label>
+          <p-rating
+            [(ngModel)]="gpEfficiencyRating"
+            [cancel]="false"
+            [style]="{ fontSize: '24px' }"
+          ></p-rating>
+        </div>
+
+        <!-- GP Q3 -->
+        <div class="field">
+          <label for="additionalNotes">Q3: Any additional notes or comments?</label>
+          <textarea id="additionalNotes" pInputTextarea [(ngModel)]="additionalNotesGp"></textarea>
+        </div>
+
+        <!-- GP Q4 -->
+        <div class="field">
+          <label>
+            Q4: Based on the most common key messages, select the most relevant:
+          </label>
+          <p-multiSelect
+            [options]="gpKeyMessages"
+            [(ngModel)]="selectedGpKeyMessages"
+            defaultLabel="Select options"
+          ></p-multiSelect>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="selectedUserType === 'Participant'">
+        <h3>Appendix 2 (For Participants):</h3>
+
+        <!-- Participant Q1 -->
+        <div class="field">
+          <label>Q1: How often do you use the health report to monitor your health?</label>
+          <p-dropdown
+            [options]="participantHealthReportFrequency"
+            [(ngModel)]="selectedParticipantHealthReportFrequency"
+            placeholder="Select an option"
+          ></p-dropdown>
+        </div>
+
+        <!-- Participant Q2 -->
+        <div class="field">
+          <label>Q2: What is the primary way you use the health reports?</label>
+          <p-radioButton
+            *ngFor="let option of participantReportUsageOptions"
+            [(ngModel)]="selectedParticipantReportUsage"
+            [value]="option"
+            [label]="option"
+            name="reportUsage"
+          ></p-radioButton>
+        </div>
+
+        <!-- Participant Q3 -->
+        <div class="field">
+          <label>Q3: How helpful do you find the health report for managing your health?</label>
+          <p-radioButton
+            *ngFor="let option of participantHealthHelpfulness"
+            [(ngModel)]="selectedParticipantHealthHelpfulness"
+            [value]="option"
+            [label]="option"
+            name="healthHelpfulness"
+          ></p-radioButton>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>
