@@ -3,7 +3,9 @@ import numpy as np
 import math
 
 #Graphs libraries
+import matplotlib
 import matplotlib.pyplot as plt
+matplotlib.use('Agg')
 from matplotlib.patches import Rectangle
 from collections import defaultdict
 import matplotlib.dates as mdates
@@ -104,7 +106,7 @@ class Graph_generator(object):
 		# k, start_date and end_date are arroe types (e.g.,  <Arrow [2023-08-27T01:00:00+01:00]>)
 		k = [value for index, value in enumerate(k) if index not in index_1]
 		k = np.array([np.datetime64(date_value) if not isinstance(date_value, np.datetime64) else date_value for date_value in k])
-		plt.clf()
+		#plt.clf()
 
 		# Create a scatter plot
 		sns.set_style("whitegrid",{ "grid.linewidth":0.5, "grid.color": ".8", "grid.linestyle": ":", "ytick.left": True})
@@ -229,7 +231,7 @@ class Graph_generator(object):
 		plt.savefig(name + 'Scatter.png', dpi = 500)
 		#plt.close()
 		# Display the plot
-		plt.show()
+		#plt.show()
 
 
 	def plot_min_max_av(self,x_values,y_average,y_min,y_max,device,type_d):
@@ -245,7 +247,7 @@ class Graph_generator(object):
 		x_values1, y_average = self.unique_values(x_values, y_average)
 		x_values1, y_min = self.unique_values(x_values, y_min)
 		x_values1, y_max = self.unique_values(x_values, y_max)
-		plt.clf()
+		#plt.clf()
 		for i, j, z in zip(y_average,y_min,y_max):
 			y_range.append([i-j, z-i])
 		y_range = np.transpose(y_range)
@@ -285,7 +287,7 @@ class Graph_generator(object):
 		plt.gca().spines['right'].set_visible(False)
 		plt.savefig(device+"_"+type_d, dpi = 500)
 		plt.close()
-		plt.show()
+		#plt.show()
 
 	def plot_continous(self,date_weight, weight, device):
 		# Create a scatter plot
@@ -301,7 +303,7 @@ class Graph_generator(object):
 		max_thresh = np.mean(y_s) + np.std(y_s)
 		min_thresh = np.mean(y_s) - np.std(y_s)
 		aver_thresh = np.mean(y_s)
-		plt.clf()
+		#plt.clf()
 		#plt.gca().set_xticks(weight)
 		if device == "Scale":
 			# Create a scatter plot
@@ -341,14 +343,14 @@ class Graph_generator(object):
 			# Display the plot
 			plt.grid(axis = "x")
 		plt.savefig(device, dpi = 500)
-		plt.show()
+		#plt.show()
 		plt.close()
 
 	def plot_bar(self,x,y):
 
 		# Create a scatter plot
 		sns.set_style("whitegrid",{ "grid.linewidth":0.5, "grid.color": ".8", "grid.linestyle": ":", "ytick.left": True})
-		plt.clf()
+		##plt.clf()
 		check = np.array(y)
 		if (y == [] or (np.all(check == 0))):
 			# Step 3 (Optional): Add labels and titles to the plot
@@ -401,7 +403,7 @@ class Graph_generator(object):
 			plt.gca().spines['right'].set_visible(False)
 		plt.savefig('Steps_curvedbar', dpi = 500)
 		# Display the plot
-		plt.show()
+		#plt.show()
 
 	def plot_stacked_bar(self,x,y,z,o):
 		# Create a scatter plot
@@ -423,7 +425,7 @@ class Graph_generator(object):
 			o_u = o
 			x_soft, o_soft= self.smooth_lines(x_u,o_u)
 			x_soft_1, o_soft_1= self.smooth_lines(x_u,y)
-			plt.clf()
+			#plt.clf()
 			plt.bar(x1, y, label='Hours Asleep', color = "cornflowerblue")
 			plt.bar(x1, z, label='Hours Awake in bed', bottom = y, color = "lightblue")
 			if self.report_type == 1:
@@ -455,7 +457,7 @@ class Graph_generator(object):
 			plt.legend(loc= 'upper center', bbox_to_anchor = (0.5,1.09), ncol =3, fontsize = 8.5, frameon=False)
 		plt.savefig('sleep_summary', dpi = 500)
 		# Show the chart
-		plt.show()
+		#plt.show()
 
 	def plot_events(self,start_times, end_times, amplitudes):
 		# Create a figure and axis
@@ -509,5 +511,5 @@ class Graph_generator(object):
 		ax.spines['right'].set_visible(False)
 		# Display the plot
 		plt.legend(handles= handles, labels = labels, loc = "upper right", frameon=False)
-		plt.show()
+		#plt.show()
 		plt.close()

@@ -46,21 +46,21 @@ class ReportGeneration(View):
             username = request.GET.get('username')
             
             # Assuming the file is in the media directory
-            file_path = os.path.join('reports/temp_report_files', '007p_report.pdf')
+            # file_path = os.path.join('reports/temp_report_files', '007p_report.pdf')
             
-            if not os.path.exists(file_path):
-                return HttpResponse("File not found.", status=404)
+            # if not os.path.exists(file_path):
+            #     return HttpResponse("File not found.", status=404)
             
-            response = FileResponse(open(file_path, 'rb'), content_type='application/pdf')
-            response['Content-Disposition'] = 'inline; filename="007p_report.pdf"'
-            return response
+            # response = FileResponse(open(file_path, 'rb'), content_type='application/pdf')
+            # response['Content-Disposition'] = 'inline; filename="007p_report.pdf"'
+            # return response
 
             #Answer from Resilient generation
             ## TODO: FINISH IMPLEMENTATION WITH WITHINGS
-            ##report_generator = Resilient()
-            ##report = report_generator.report_generation(report_type = report_type, username = username)
+            report_generator = Resilient()
+            report = report_generator.report_generation(report_type = report_type, username = username)
 
-            #return JsonResponse({'status': 'success', 'report': report})
+            return JsonResponse({'status': 'success', 'report': report})
         
         except json.JSONDecodeError:
             

@@ -129,9 +129,9 @@ class Devices_OAuth2flow(object):
 
 	def create_credentials(self, code = None):
 		self.create_auth_url()
-		if not path.isfile(self.CREDENTIALS_FILE):
-			self.save_credentials(self.auth.get_credentials(code))
-			self.api = WithingsApi(self.load_credentials(), refresh_cb = self.save_credentials)
+		
+		self.save_credentials(self.auth.get_credentials(code))
+		self.api = WithingsApi(self.load_credentials(), refresh_cb = self.save_credentials)
 			
 		orig_access_token = self.api.get_credentials().access_token
 		print("Refreshing token...")
@@ -296,7 +296,7 @@ class Devices_OAuth2flow(object):
 		hash_deviceid = [i['hash_deviceid'] for i in devices]
 		MAC_address = [i['mac_address'] for i in devices]
 		# Devices to csv database files
-		self.database.SM.load_SensorInfo(sensor = type_d, hash_deviceid = hash_deviceid, MAC_address = MAC_address)
+		#self.database.SM.load_SensorInfo(sensor = type_d, hash_deviceid = hash_deviceid, MAC_address = MAC_address)
 		# Devices to API database -devices
 		self.database_api.upload_device_info(dict = filtered_data)
 		for i in range(len(hash_deviceid)):
@@ -765,14 +765,14 @@ class Devices_OAuth2flow(object):
 
 		#Woke up and fell asleep times
 		#This is to calculate the woke up and fell asleep times 
-		sleep_summary_backup = self.api.sleep_get_summary(data_fields=GetSleepSummaryField, startdateymd=arrow.utcnow().shift(days =  self.ending_day_c - 7),enddateymd=arrow.utcnow().shift(days = self.ending_day_c + 1), lastupdate = None)
-		sleepbu_data['date'] = [arrow.get(x.date) for x in sleep_summary_backup.series]
-		sleepbu_data['start_date'] = [arrow.get(x.startdate) for x in sleep_summary_backup.series]
-		sleepbu_data['end_date'] = [arrow.get(x.enddate) for x in sleep_summary_backup.series]
-		sleepbu_data['data'] = [x.data for x in sleep_summary_backup.series]
-		sleepbu_data['night_events'] = [x.night_events for x in sleepbu_data['data']]
-		current_dates_ne, current_events, positions = self.data_utils.unique_values_sleep(sleepbu_data['date'], sleepbu_data['start_date'], sleepbu_data['end_date'], sleepbu_data['night_events'])
-		self.daily_dates(startdate = sleepbu_data['start_date'], enddate = sleepbu_data['end_date'], positions = positions)		
+		# sleep_summary_backup = self.api.sleep_get_summary(data_fields=GetSleepSummaryField, startdateymd=arrow.utcnow().shift(days =  self.ending_day_c - 7),enddateymd=arrow.utcnow().shift(days = self.ending_day_c + 1), lastupdate = None)
+		# sleepbu_data['date'] = [arrow.get(x.date) for x in sleep_summary_backup.series]
+		# sleepbu_data['start_date'] = [arrow.get(x.startdate) for x in sleep_summary_backup.series]
+		# sleepbu_data['end_date'] = [arrow.get(x.enddate) for x in sleep_summary_backup.series]
+		# sleepbu_data['data'] = [x.data for x in sleep_summary_backup.series]
+		# sleepbu_data['night_events'] = [x.night_events for x in sleepbu_data['data']]
+		# current_dates_ne, current_events, positions = self.data_utils.unique_values_sleep(sleepbu_data['date'], sleepbu_data['start_date'], sleepbu_data['end_date'], sleepbu_data['night_events'])
+		# self.daily_dates(startdate = sleepbu_data['start_date'], enddate = sleepbu_data['end_date'], positions = positions)		
 		
 		
 

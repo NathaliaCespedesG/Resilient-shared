@@ -3,7 +3,7 @@ from ..environment_config import EnvironmentConfig
 from datetime import datetime
 from os import path 
 from PyPDF2 import PdfMerger
-import os 
+import os, time
 import pandas as pd
 import shutil
 import utils.Withings_ScanWatch.db.database as database
@@ -50,7 +50,10 @@ class Resilient(object):
                                         callback_uri = self.__callback_url,
                                         report_type = 0,
                                         id_participant = username,
-                                        running_type = None)
+                                        running_type = None, 
+                                        setup_month = None,
+                                        from_report = None,
+                                        to_report = None)
             path = m.CREDENTIALS_FILE
             self.database_api.register_update(user_uid = user_uid, path = path)
             m.create_credentials(code = code)
