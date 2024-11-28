@@ -8,7 +8,6 @@ import pandas as pd
 import shutil
 import utils.Withings_ScanWatch.db.database as database
 import utils.Withings_ScanWatch.db.database_django as database_api
-import utils.Withings_ScanWatch.Devices_OAuth2flow as reports
 import utils.Withings_ScanWatch.resources.PDF_usage_generation as usage_pdf
 import utils.Withings_ScanWatch.versions.withings_acquisition_v1 as reports_v1
 import utils.Withings_ScanWatch.versions.withings_acquisition_v2 as reports_v2
@@ -33,16 +32,30 @@ class Resilient(object):
         
     def create_credentials(self, code = None, user_uid = None, username = None, role = None):
         #Patch the withings credentials in the application
-        m = reports.Devices_OAuth2flow(client_id = self.__client_id, 
-		                            costumer_secret = self.__costumer_secret,
-		                            callback_uri = self.__callback_url,
-		                            report_type = 0,
-                                    id_participant = username,
-                                    running_type = None)
-        path = m.CREDENTIALS_FILE
-        self.database_api.register_update(user_uid = user_uid, path = path)
-        m.create_credentials(code = code)
-        m.register_devices()
+        if self.version == "v1":
+            m = reports_v1.Devices_OAuth2flow(client_id = self.__client_id, 
+                                        costumer_secret = self.__costumer_secret,
+                                        callback_uri = self.__callback_url,
+                                        report_type = 0,
+                                        id_participant = username,
+                                        running_type = None)
+            path = m.CREDENTIALS_FILE
+            self.database_api.register_update(user_uid = user_uid, path = path)
+            m.create_credentials(code = code)
+            m.register_devices()
+        
+        if self.version == "v2":
+            m = reports_v2.Devices_OAuth2flow(client_id = self.__client_id, 
+                                        costumer_secret = self.__costumer_secret,
+                                        callback_uri = self.__callback_url,
+                                        report_type = 0,
+                                        id_participant = username,
+                                        running_type = None)
+            path = m.CREDENTIALS_FILE
+            self.database_api.register_update(user_uid = user_uid, path = path)
+            m.create_credentials(code = code)
+            m.register_devices()
+
 
     def run_reports_version(self,id_report):
         if self.version == "v1":

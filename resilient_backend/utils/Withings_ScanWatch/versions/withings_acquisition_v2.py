@@ -126,16 +126,22 @@ class Devices_OAuth2flow(object):
 		
 		self.CREDENTIALS_FILE: Final = self.final_path
 		print(self.CREDENTIALS_FILE)
+
+	def create_credentials(self, code = None):
+		self.create_auth_url()
+		if not path.isfile(self.CREDENTIALS_FILE):
+			self.save_credentials(self.auth.get_credentials(code))
+			self.api = WithingsApi(self.load_credentials(), refresh_cb = self.save_credentials)
+			
+		orig_access_token = self.api.get_credentials().access_token
+		print("Refreshing token...")
+		self.api.refresh_token()
+		print("After Refreshing")
 		
 	def create_auth_url(self):
 
 		# This function is to create the URL which will be used by the
 		# user to authorize the acquisition of the data
-		print('isusssssssssssssssssssssssssssssse')
-		print(self.client_id)
-		print(self.costumer_secret)
-		print(self.callback_uri)
-
 		self.auth = WithingsAuth(
 
 			client_id = str(self.client_id),
@@ -967,8 +973,13 @@ class Devices_OAuth2flow(object):
 		return(get_raw)
 
 	def save_credentials(self, credentials: CredentialsType) -> None:
-
 		"""Save credentials to a file."""
+		# Ensure the parent directory exists
+		parent_dir = os.path.dirname(self.CREDENTIALS_FILE)
+		if not os.path.exists(parent_dir):
+			print(f"Creating parent directory: {parent_dir}")
+			os.makedirs(parent_dir, exist_ok=True)
+            
 		print("Saving credentials in:", self.CREDENTIALS_FILE)
 		with open(self.CREDENTIALS_FILE, "wb") as file_handle:
 			pickle.dump(credentials, file_handle)
