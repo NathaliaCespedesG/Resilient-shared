@@ -239,6 +239,7 @@ class GetSleepSummaryField(Enum):
     TIME_INBED = "total_timeinbed"
     TIME_AWAKE_INBED = "waso"
     OUT_OF_BED_COUNT = "out_of_bed_count"
+    NIGHT_EVENTS = "night_events"
 
 
 class AuthScope(Enum):
@@ -361,6 +362,7 @@ class GetSleepSummaryData(
     total_timeinbed: Optional[int]
     waso:Optional[int]
     out_of_bed_count: Optional[int]
+    night_events: Any
 
 
 class GetSleepSummarySerie(ConfiguredBaseModel):
@@ -430,6 +432,9 @@ class MeasureGetMeasMeasure(ConfiguredBaseModel):
 
 class MeasureGetMeasGroup(ConfiguredBaseModel):
     """MeasureGetMeasGroup."""
+
+    print('In measure tuple')
+
     attrib: MeasureGetMeasGroupAttrib
     category: MeasureGetMeasGroupCategory
     created: ArrowType

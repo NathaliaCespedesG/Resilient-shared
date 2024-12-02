@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, ReplaySubject, map } from 'rxjs';
 import { Users, Devices } from '../shared/models/database-types';
 import { ICONS } from '../shared/constants/icons'
 import { EnvService } from './env.service';
+import { LocalStorageService } from './local-storage.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,8 @@ export class RequestsService {
 
   constructor(
     private http: HttpClient,
-    private _envService: EnvService
+    private _envService: EnvService,
+    private _localStorageService: LocalStorageService
   ) {
     this.baseUrl = this._envService.appConfig.apiUrl;
   }
@@ -37,9 +39,38 @@ export class RequestsService {
   }
 
   getUsers(): Observable<Users> {
+    const usersFromStorage = this._localStorageService.getData('users');
+
+    if (usersFromStorage) {
+      return new Observable(observer => {
+        observer.next(usersFromStorage);
+        observer.complete();
+      });
+    }
+
     const usersUrl = this.baseUrl + 'users/';
 
-    return this.http.get<Users>(usersUrl);
+    return this.http.get<Users>(usersUrl).pipe(
+      map((answer: Users) => {
+        let usersArray: Users = {users: [], loaded: false};
+
+        if (answer) {
+          usersArray = {
+            users: Object.values(answer.users),
+            loaded: true
+          } ;
+          usersArray.users = usersArray.users.filter(user => {
+            const role = user.role.toLowerCase();
+            const active = user.active;
+            return role !== 'admin' && role !== 'clinician' && role !== 'super_admin' && active;
+          });
+        }
+
+        this._localStorageService.setData('users', usersArray);
+        return usersArray;
+
+      })
+    );
   }
 
   getDevices(): Observable<Devices> {

@@ -28,48 +28,52 @@
   </div>
 
   <!--Participants table-->
-  <div class="dashboard-option-body h-full w-full">
-    <p-table
-      [value]="filteredParticipants"
-      [scrollable]="true"
-      [rowHover]="true"
-      [paginator]="true"
-      [rows]="5"
-      [showCurrentPageReport]="true"
-      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-      (onRowSelect)="onSelectParticipant($event)"
-      selectionMode="single"
-      [(selection)]="selectedRows"
-      styleClass="participants-table"
-      >
-      <ng-template pTemplate="header">
-          <tr>
-              <th ></th>
-              <th [pSortableColumn]="'username'">Username<p-sortIcon field="username"></p-sortIcon></th>
-              <th [pSortableColumn]="'role'">Role<p-sortIcon field="role"></p-sortIcon></th>
-              <th [pSortableColumn]="'updated_at'">Updated at<p-sortIcon field="updated_at"></p-sortIcon></th>
-              <th style="width: 15vw;">Devices</th>
-          </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-participant>
-          <tr [pSelectableRow]="participant">
-              <td class="icon-column">
-                <img class="participant-icon" src="./../../../assets/icons/participant-table-icon.svg">
-              </td>
-              <td class="text-nowrap text-ellipsis max-w-20 overflow-hidden ">{{participant.username}}</td>
-              <td class="text-nowrap text-ellipsis max-w-20 overflow-hidden ">{{participant.role}}</td>
-              <td class="text-nowrap text-ellipsis max-w-20 overflow-hidden ">{{participant.updated_at}}</td>
-              <td class="text-nowrap text-ellipsis max-w-5 overflow-hidden">
-                <div class="devices-cell">
-                  <img class="devices-cell-icon" src="./../../../assets/icons/devices_bed.svg">
-                  <img class="devices-cell-icon" src="./../../../assets/icons/devices_clock.svg">
-                  <img class="devices-cell-icon" src="./../../../assets/icons/devices_scale.svg">
-                </div>
-              </td>
-          </tr>
-      </ng-template>
-    </p-table>
-  </div>
+  @if (!filteredParticipants.loaded) {
+    <p>Loading ...</p>
+  } @else {
+    <div class="dashboard-option-body h-full w-full">
+      <p-table
+        [value]="filteredParticipants.users"
+        [scrollable]="true"
+        [rowHover]="true"
+        [paginator]="true"
+        [rows]="5"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+        (onRowSelect)="onSelectParticipant($event)"
+        selectionMode="single"
+        [(selection)]="selectedRows"
+        styleClass="participants-table"
+        >
+        <ng-template pTemplate="header">
+            <tr>
+                <th ></th>
+                <th [pSortableColumn]="'username'">Username<p-sortIcon field="username"></p-sortIcon></th>
+                <th [pSortableColumn]="'role'">Role<p-sortIcon field="role"></p-sortIcon></th>
+                <th [pSortableColumn]="'updated_at'">Updated at<p-sortIcon field="updated_at"></p-sortIcon></th>
+                <th style="width: 15vw;">Devices</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-participant>
+            <tr [pSelectableRow]="participant">
+                <td class="icon-column">
+                  <img class="participant-icon" src="./../../../assets/icons/participant-table-icon.svg">
+                </td>
+                <td class="text-nowrap text-ellipsis max-w-20 overflow-hidden ">{{participant.username}}</td>
+                <td class="text-nowrap text-ellipsis max-w-20 overflow-hidden ">{{participant.role}}</td>
+                <td class="text-nowrap text-ellipsis max-w-20 overflow-hidden ">{{participant.updated_at}}</td>
+                <td class="text-nowrap text-ellipsis max-w-5 overflow-hidden">
+                  <div class="devices-cell">
+                    <img class="devices-cell-icon" src="./../../../assets/icons/devices_bed.svg">
+                    <img class="devices-cell-icon" src="./../../../assets/icons/devices_clock.svg">
+                    <img class="devices-cell-icon" src="./../../../assets/icons/devices_scale.svg">
+                  </div>
+                </td>
+            </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  }
 
   <!--Add participant dialog-->
   <p-dialog
@@ -171,7 +175,7 @@
 
       <div class="devices">
         @if (!participantData.devicesLoaded) {
-          <p>Loading..</p>
+          <p>Loading ...</p>
         } @else {
           @if (participantData.devices.length == 0) {
             <p>No devices found.</p>

@@ -81,6 +81,7 @@ class Resilient(object):
     
     def report_generation(self, report_type = None, username = None):
         users = self.current_users()
+        print (users)
         self.gen_type = report_type
         if self.gen_type == 'all':
             self.id_available = users
@@ -143,22 +144,37 @@ class Resilient(object):
             for i in range (total_participants):
                 print('in run all')
                 id_report = self.id_available[i]
+                print('After id_report')
                 self.run_reports_version(id_report = id_report)
+                print('After run_reports_version')
                 self.reports_resilient.get_user_credentials()
+                print('After get_user_credentials')
                 self.reports_resilient.register_devices()
+                print('After register_devices')
                 self.reports_resilient.devices_info()
+                print('After devices_info')
                 self.reports_resilient.scale_data()
+                print('After scale_data')
                 self.reports_resilient.sleep()
+                print('After sleep')
                 self.reports_resilient.intra_sleep()
+                print('After intra_sleep')
                 self.reports_resilient.intra_activitydata_watch()
+                print('After intra_activitydata_watch')
                 self.reports_resilient.activity_data_watch()
+                print('After activity_data_watch')
                 self.reports_resilient.plot_creator()
+                print('After plot_creator')
                 self.reports_resilient.doc_generation()
+                print('After doc_generation')
                 #reports_resilient.usage_levels()
                 self.reports_resilient.remove_images()
+                print('After remove_images')
                 self.reports_resilient.db_filling()
+                print('After db_filling')
                 if self.version == "v2":
                     self.reports_resilient.db_api_filling()
+                    print('After db_api_filling')
                 #reports_resilient.db_cleaning()
                 print(id_report)
             

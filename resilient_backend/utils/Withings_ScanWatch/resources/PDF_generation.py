@@ -28,6 +28,7 @@ class PDF_generation(object):
 		#creating the database object
 		self.path = path
 
+		#creating the table
 		# Values for building the table
 		self.report_type = report_type
 		self.day_hr = day_hr
@@ -41,12 +42,13 @@ class PDF_generation(object):
 		self.e_date = e_date
 
 		self.configure_pdf_fonts()
-
+		print("after configure_pdf_fonts")
 		#Current year
 		self.current_year =str(datetime.datetime.now().year)
+		print("after current_year")
 		#NHS
 		self.id = self.id_string(id_nhs)
-
+		print("after id")
 		self.document_generation()
 		return
 
@@ -62,15 +64,18 @@ class PDF_generation(object):
 		return
 		
 	def id_string(self, x):
-		if x.endswith('s'):
-			base_id = x.rstrip('s')
-		else:
-			base_id = x
-		formatted_id = '{:03d}'.format(int(base_id))
-		if x.endswith('s'):
-			formatted_id += 's'
-		else:
-			formatted_id += 'p'
+		try:
+			if x.endswith('s'):
+				base_id = x.rstrip('s')
+			else:
+				base_id = x
+			formatted_id = '{:03d}'.format(int(base_id))
+			if x.endswith('s'):
+				formatted_id += 's'
+			else:
+				formatted_id += 'p'
+		except:
+			formatted_id = x
 		return formatted_id
 
 
@@ -274,6 +279,8 @@ class PDF_generation(object):
 		title.drawOn(canvas, doc.leftMargin, doc.height + 3 * cm )
 
 	def document_generation(self):
+		print("Starting document generation")
+		
 		# Path where saving the reports
 		document_file = self.path + "/"+ (self.id +"_report.pdf")
 		
@@ -285,6 +292,8 @@ class PDF_generation(object):
 		sd_c,sd_p, sd_m = self.averages_data(self.sleep_duration[0],self.sleep_duration[1], self.sleep_duration[2], type_d = 'sd')
 		sa_c,sa_p, sa_m  = self.averages_data(self.sleep_apnoea[0],self.sleep_apnoea[1],self.sleep_apnoea[2], type_d = 'sa')
 		w_c, w_p, w_m = self.averages_data(self.weight[0], self.weight[1], self.weight[2], type_d = 'weight')
+
+		print("Averages calculated")
 
 		if self.report_type == 1:
 			# Create a list of data for the table
@@ -302,6 +311,8 @@ class PDF_generation(object):
 	    	[f"Average since \n {self.c_date}",hr_p , nhr_p  ,rr_p , steps_p , w_p , sd_p  , sa_p]
 	    			]
 
+		print("Data for table created")
+
 		# Create a list of images for the matrix plot
 		images = [
     		"HR_ScanWatchScatter.png",
@@ -312,6 +323,8 @@ class PDF_generation(object):
     		"sleep_summary.png",
 			]
 
+		print("List of images created")
+
 		# Define the size and positioning of the table and images
 		table_width = 8 * inch
 		table_height = 1.68 * inch
@@ -319,12 +332,16 @@ class PDF_generation(object):
 		image_height = 2.17 * inch
 		spacing = 0.4 * cm
 
+		print("Sizes and positions set")
+
 		# Create a canvas and set the size
 		doc = SimpleDocTemplate(document_file, pagesize = A4, title="Resilient")
 
 		# Add the title page to the document
 		styles = getSampleStyleSheet()
 		doc.build([Paragraph("", styles['Normal'])], onFirstPage=self.create_title_page)
+
+		print("Title page created")
 
 		# Create a table object and set its properties
 		table = Table(data)
@@ -339,6 +356,8 @@ class PDF_generation(object):
     		('GRID', (0, 0), (-1, -1), 1, colors.black),
 		]))
 
+		print("Table created")
+
 		# Changing the font size for row 1
 		table_style = TableStyle([('FONTSIZE', (0, 0), (-1, 0), 10)])
 		table.setStyle(table_style)
@@ -348,12 +367,16 @@ class PDF_generation(object):
 			table_style = TableStyle([('FONTSIZE', (0, i), (0, i), 10)])
 			table.setStyle(table_style)
 
+		print("Font sizes changed")
+
 		#conditionals for the table
 		m = self.conditional_highlighting(self.day_hr, self.night_hr, self.night_rr,
 										  self.steps, self.weight, self.sleep_duration, self.sleep_apnoea,
 										  )
 		highlight_table_style = TableStyle(m)
 		table.setStyle(highlight_table_style)
+
+		print("Conditionals applied")
 
 		spacer1 = Spacer(3, spacing)
 		spacer2 = Spacer(10, spacing)
@@ -366,12 +389,18 @@ class PDF_generation(object):
 			image = Image(image_path, width=image_width, height=image_height)
 			image_list.append(image)
 
+		print("Images added to list")
+
 		# Create a table for the images in a matrix-like plot
 		image_table = Table([image_list[i:i+2] for i in range(0, len(image_list), 2)])
+
+		print("Image table created")
 
 		# Build the PDF document
 		elements = [spacer1,table, spacer2, spacer2, spacer1, image_table]
 		doc.build(elements)
+
+		print("PDF built")
 
 	@classmethod
 	def main(cls):

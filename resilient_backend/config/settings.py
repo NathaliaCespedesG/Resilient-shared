@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 from utils.environment_config import EnvironmentConfig
 
@@ -51,9 +52,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    'rest_framework',
+    'rest_framework_simplejwt',
     'corsheaders',
     'api',
-    'reports'
+    #'accounts',
+    'reports',
 ]
 
 MIDDLEWARE = [
@@ -71,6 +75,22 @@ CORS_ORIGIN_ALLOW_ALL = True  # Set this to False to only allow specific origins
 # CORS_ORIGIN_WHITELIST = [
 #     'http://localhost:4200',  # Add the origin of your Angular frontend
 # ]
+
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': (
+#         'rest_framework_simplejwt.authentication.JWTAuthentication',
+#     ),
+#     'DEFAULT_PERMISSION_CLASSES': (
+#         'rest_framework.permissions.IsAuthenticated',
+#     ),
+# }
+
+# SIMPLE_JWT = {
+#     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+#     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+# }
+
+# AUTH_USER_MODEL = 'accounts.User'
 
 ROOT_URLCONF = 'config.urls'
 

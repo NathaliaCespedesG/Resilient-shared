@@ -114,7 +114,7 @@ class AbstractWithingsApi:
         self, path: str, params: Dict[str, Any], method: str = "GET"
     ) -> Dict[str, Any]:
         """Fetch data from the Withings API."""
-        print(method)
+        #print(method)
 
     def request(
         self, path: str, params: Dict[str, Any], method: str = "GET"
@@ -127,6 +127,8 @@ class AbstractWithingsApi:
     def request_post(
         self, path: str, params: Dict[str, Any], method: str = "GET"
     ) -> Dict[str, Any]:
+        print("%s/%s" % (self.URL.strip("/"), path.strip("/")))
+        print(params)
 
         return cast(
             Dict[str, Any],
@@ -209,7 +211,7 @@ class AbstractWithingsApi:
         self,
         hash_deviceid: str,
         rawdata_type: int,
-        enddate: Optional[DateType] = arrow.utcnow()
+        enddate: int,
         ):
 
         #This function allows to activate Raw Data Collection. The raw data
@@ -217,14 +219,18 @@ class AbstractWithingsApi:
         #the API call. The capture will stop automatically at the enddate provided
         #in the API call
 
+        
         print(enddate)
-        print(rawdata_type)
+        print(type(enddate))
+
+        #print(enddate)
+        #print(rawdata_type)
 
         params: Final[ParamsType] = {}
 
         update_params(params,"hash_deviceid", hash_deviceid)
         update_params(params,"rawdata_type",rawdata_type)
-        update_params(params,"enddate",enddate,lambda val: arrow.get(val).int_timestamp)
+        update_params(params,"enddate", enddate)
         update_params(params, "action", 'activate')
 
         return(self.request_post(path=self.PATH_V2_RAWDATA, params=params, method = "POST")
@@ -250,27 +256,27 @@ class AbstractWithingsApi:
         self,
         hash_deviceid: str,
         rawdata_type: int,
-        startdate: Optional[DateType] = arrow.utcnow(),
-        enddate: Optional[DateType] = arrow.utcnow(),
+        startdate: int,
+        enddate: int,
         offset: Optional[int] = None
         ):
 
         #This function allows to fetch Raw of an specific type. 
 
         params: Final[ParamsType] = {}
+        
+        
 
         update_params(params,"hash_deviceid", hash_deviceid)
         update_params(params,"rawdata_type",rawdata_type)
-        update_params(params,"startdate",startdate,lambda val: arrow.get(val).int_timestamp)
-        
-
-        update_params(params,"enddate",enddate,lambda val: arrow.get(val).int_timestamp)
+        update_params(params,"startdate",startdate)
+        update_params(params,"enddate", enddate)
         update_params(params, "offset", offset)
         update_params(params, "action", 'get')
 
         #print(params)
 
-        return(self.request_post(path=self.PATH_V2_RAWDATA, params=params, method = "POST")
+        return(self.request_post(path=self.PATH_V2_RAWDATA, params=params, method="POST")
         )
     
 
@@ -301,7 +307,7 @@ class AbstractWithingsApi:
         )
         update_params(params, "action", "getmeas")
 
-        print('Im getting measures from here', params)
+        #print('Im getting measures from here', params)
         
         return MeasureGetMeasResponse(
             **self.request(path=self.PATH_MEASURE, params=params)

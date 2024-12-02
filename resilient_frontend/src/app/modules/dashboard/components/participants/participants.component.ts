@@ -27,13 +27,13 @@ export class ParticipantsComponent implements OnInit {
   deviceName: string = '';
   deviceDetailsVisible: boolean[] = [];
   editParticipantForm: FormGroup;
-  filteredParticipants: User[] = [];
+  filteredParticipants: Users = {users: [], loaded: false};
   icons = ICONS;
   isAddParticipantSuccessful: boolean = false;
   isDuplicateUsername: boolean = false;
   participantData: any;
   participantForm: FormGroup;
-  participants: User[] = [];
+  participants: Users = {users: [], loaded: false};
   nullReplaceValue: number;
   roles: Role[] = [];
   selectedRole: Role | undefined;
@@ -131,8 +131,10 @@ export class ParticipantsComponent implements OnInit {
   getUsers(): void{
     this._dataStorageService.getUsers().subscribe({
       next: (filteredUsers: User[]) => {
-        this.participants = filteredUsers;
-        this.filteredParticipants = filteredUsers;
+        this.participants.users = filteredUsers;
+        this.filteredParticipants.users = filteredUsers;
+        this.participants.loaded = true;
+        this.filteredParticipants.loaded = true;
       },
       error: (err) => {
         console.error('Error fetching users:', err);
@@ -141,7 +143,7 @@ export class ParticipantsComponent implements OnInit {
   }
 
   applyUsernameFilter(): void {
-    this.filteredParticipants = this.participants.filter(participant => {
+    this.filteredParticipants.users = this.participants.users.filter(participant => {
       return participant.username.toLowerCase().includes(this.usernameFilter.toLowerCase());
     });
   }
@@ -176,7 +178,6 @@ export class ParticipantsComponent implements OnInit {
       role: this.participantForm.value.selectedRole.name,
       password_hash: "NA"
     }
-    console.log(participantData);
 
     this._requestsService.addParticipant(participantData).subscribe({
       next: (response) => {

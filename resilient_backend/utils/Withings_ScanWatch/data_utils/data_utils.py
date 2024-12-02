@@ -367,19 +367,24 @@ class Data_Handler(object):
 
 	#The following function is to extract the data of the last week from all the values since registration
 	def values_dates_intersection(self, dates = None, start_date = None, end_date = None, values = None):
-		dates =  np.array(dates, dtype='datetime64')
 
+		dates = [date_value.datetime if isinstance(date_value, arrow.Arrow) else date_value for date_value in dates]
+
+	
+		dates =  np.array(dates, dtype='datetime64')
 		start_date = np.datetime64(start_date.format('YYYY-MM-DD'))
 		end_date = np.datetime64(end_date.format('YYYY-MM-DD'))
-
 		# Create a boolean mask for filtering
-		mask = [(start_date <= date <= end_date) for date in dates]
 		#print('Printing the mask for usage')
 		#print(mask)
-
+		mask = [(start_date <= date <= end_date) for date in dates]
 		# Apply the mask to get filtered values
+		filtered_dates = [date for date, m in zip(dates, mask) if m]
 		filtered_values = [value for value, m in zip(values, mask) if m]
-		return(filtered_values)
+
+		#print(filtered_dates)
+		#print(type(filtered_dates[0]))
+		return(filtered_dates, filtered_values)
 	
 	# The following function is to understand the weekly devices usage during the week
 	def usage_understanding(self, start_date = None, end_date = None, start_date_scale = None, sleep_u = None, watch_u = None, scale_u = None):

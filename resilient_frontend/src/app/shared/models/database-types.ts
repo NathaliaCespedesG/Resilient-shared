@@ -9,6 +9,7 @@ export interface User {
 
 export interface Users {
   users: User[];
+  loaded: boolean;
 }
 
 export interface Device {
