@@ -1,26 +1,35 @@
 #Module description: This module is in charge of data preprocessing:
-#Cleaning 'Nan' values, filtering the data and filling data when is missing with the intraday activity
-from datetime import timedelta, datetime
-from withings_api.common import MeasureType
+#Cleaning 'Nan' values, filtering the data and filling data when is missing with the
+#intraday activity
+
 import arrow
 import numpy as np
+from datetime import timedelta, datetime
+from withings_api.common import MeasureType
 
 class Data_Handler(object):
+
 	def __init__(self):
+
 		print('Data Utils module loaded')
+
 
 	def initial_day(self):
 		#Function to calculat the ending date (latest date for acquisition) for the request with the Withings API
+		
 		today = datetime.today() - timedelta(weeks=1)
 		days_difference = today.isoweekday() % 7
 		return (-days_difference)
 
 	def data_cleaning(self, x, y):
+
+
 		y = np.array(y, dtype=float)
 		y[np.isnan(y)] = np.nan
 
 		#This function is to clean the data from none or 0 values and convert x to timestamps
 		#As withings has different ways to format the dates this function will set all dates to datetime variables
+
 		y[y == None] = np.nan
 		y[y == 0] = np.nan
 		y[y == -1] = np.nan
@@ -36,6 +45,7 @@ class Data_Handler(object):
 		return(x,y)
 
 	def hr_filtering(self, x, y):
+
 		# Create a dictionary to aggregate y-values for each unique x-value
 		data_dict = {}
 
@@ -44,14 +54,18 @@ class Data_Handler(object):
 				data_dict[x[i]] = []
 			data_dict[x[i]].append(y[i])
 
+
 		# Calculate the average y-values for each unique x-value
 		timestamps = list(data_dict.keys())
 		values = [np.mean(data_dict[x_val]) for x_val in timestamps]
 
 		# Convert timestamps to integers
+
 		timestamps = [int(ts_str) for ts_str in timestamps]
 
 		#Deleting HR values at higher frequencies than 9min
+
+
 		try:
 			# Find the minimum timestamp
 			min_timestamp = min(timestamps)
@@ -60,9 +74,11 @@ class Data_Handler(object):
 			# Handle the case when the timestamps list is empty
 			min_timestamp = None
 
+
 		# Create new arrays for filtered timestamps and values
 		filtered_timestamps = []
 		filtered_values = []
+
 
 		if min_timestamp is not None:
 			filtered_timestamps = [min_timestamp]
@@ -74,9 +90,11 @@ class Data_Handler(object):
 				filtered_timestamps.append(timestamps[i])
 				filtered_values.append(values[i])
 
+
 		return(filtered_timestamps, filtered_values)
 
 	def unique_values_scale(self, dates, y):
+
 		# Initialize variables to track daily sums and counts
 		daily_sums = {}
 		daily_counts = {}
@@ -104,6 +122,8 @@ class Data_Handler(object):
 				daily_counts[date_key] = 1
 
 			# Only add the date to the new list if it's the first occurrence of the day
+
+
 			if daily_counts[date_key] == 1:
 				new_d.append(date)
 				try:
@@ -111,11 +131,24 @@ class Data_Handler(object):
 				except:
 					new_weights.append(float('nan'))
 
+
 		# If you have NaN values, you can replace them in the new_weights list
 		new_weights = [np.nan if np.isnan(x) else round(x, 2) for x in new_weights]
+
+
+		#print("New Dates:", new_d)
+		#print("New Weights:", new_weights)
+		#print("New Dates:", len(new_d))
+		#print("New Weights:", len(new_weights))
+
 		return(new_d, new_weights)
 
+
+
+
 	def unique_values_sleep(self, dates, start_date, end_date, values):
+
+
 		dates = [datetime.fromtimestamp(a.timestamp()) for a in dates]
 		start_date = [arrow_datetime.datetime for arrow_datetime in start_date]
 		end_date = [arrow_datetime.datetime for arrow_datetime in end_date]
@@ -129,6 +162,9 @@ class Data_Handler(object):
 		y = np.array(values)
 		# Calculate the difference between the startdate and enddate
 		m = (x2 - x1)
+
+		#print(m)
+		#print(values)
 
 		# Leave the values where the difference is the higher one
 		max_m_per_date = {}
@@ -145,12 +181,21 @@ class Data_Handler(object):
 			unique_y.append(values[max_m])
 
 		positions = list(max_m_per_date.values())
+
 		return(unique_dates, unique_y, positions)
 
 	def hr_average_basedon_sleep(self, dates = None, HR = None, startdates = None, enddates = None):
+
 		# Initialize a dictionary to store mean HR values for each key
 		mean_hr_dict = {}
+
+		#print('IN FILLIIIIIIIIIIIING')
+		#print(len(startdates))
+		#print(len(dates))
+
+
 		try:
+
 			if len(startdates) < len(dates):
 
 				missing_days = len(dates) - len(startdates)
@@ -185,6 +230,7 @@ class Data_Handler(object):
 				hr_values_within_range = []
 				timestamps_within_range = []
 				
+
 				# Iterate through timestamps and HR values for this key
 				for timestamp, hr in zip(timestamps, hr_values):
 					
@@ -201,118 +247,147 @@ class Data_Handler(object):
 					mean_hr_dict[key] = None
 			
 				rounded_values_list = [round(value)  if value is not None else None for value in mean_hr_dict.values()]
+
+
 		except IndexError:
 			
 			print("Warning ! : Startdates list list is empty.")
 			rounded_values_list = np.full(7, np.nan)
 
+		
+			
+
+		#print(rounded_values_list)
 		return(rounded_values_list)
 
 	def package_halfhour_calculation(self, timestamps,values):
+		
+
 		if not timestamps:
-			return float('nan')
+			average = float('nan')
 
-		# Convert timestamps to integers
-		timestamps = [int(ts_str) for ts_str in timestamps]
+		else:
+			# Convert timestamps to integers
+			timestamps = [int(ts_str) for ts_str in timestamps]
 
-		# Create a dictionary to store values in half-hour intervals
-		half_hour_intervals = {}
+			# Create a dictionary to store values in half-hour intervals
+			half_hour_intervals = {}
 
-		# Define the interval duration (30 minutes) in seconds
-		interval_duration = 30 * 60
+			# Define the interval duration (30 minutes) in seconds
+			interval_duration = 30 * 60
 
-		# Initialize the first interval's start time
-		#try:
-		#print('Here')
-		current_interval_start = timestamps[0]
-		#print(current_interval_start)
-		#except:
-		#current_interval_start = None
+			# Initialize the first interval's start time
+			#try:
+			#print('Here')
+			current_interval_start = timestamps[0]
+			#print(current_interval_start)
+			#except:
+			#current_interval_start = None
 
-		# Initialize variables to calculate the sum and count within each interval
-		interval_sum = 0
-		interval_count = 0
+			# Initialize variables to calculate the sum and count within each interval
+			interval_sum = 0
+			interval_count = 0
 
-		if current_interval_start is not None:
+			#print('----------------------------------------------------------')
+			#print(current_interval_start)
 
-			for timestamp, value in zip(timestamps, values):
+			if current_interval_start is not None:
 
-				while timestamp >= current_interval_start + interval_duration:
-					# Calculate the average for the current interval and store it
-					if interval_count > 0:
-						interval_average = interval_sum / interval_count
-						half_hour_intervals[current_interval_start] = interval_average
+				for timestamp, value in zip(timestamps, values):
 
-
-					# Move to the next interval
-					current_interval_start += interval_duration
-					interval_sum = 0
-					interval_count = 0
-
-				interval_sum += value
-				interval_count += 1
+					while timestamp >= current_interval_start + interval_duration:
+						# Calculate the average for the current interval and store it
+						if interval_count > 0:
+							interval_average = interval_sum / interval_count
+							half_hour_intervals[current_interval_start] = interval_average
 
 
-			# Calculate the average for the last interval
+						# Move to the next interval
+						current_interval_start += interval_duration
+						interval_sum = 0
+						interval_count = 0
 
-			if interval_count > 0:
-				interval_average = interval_sum / interval_count
-				half_hour_intervals[current_interval_start] = interval_average
+					interval_sum += value
+					interval_count += 1
+
+
+				# Calculate the average for the last interval
+
+				if interval_count > 0:
+					interval_average = interval_sum / interval_count
+					half_hour_intervals[current_interval_start] = interval_average
 
 
 
-			total_sum = sum(half_hour_intervals.values())
-			num_values = len(half_hour_intervals)
+				total_sum = sum(half_hour_intervals.values())
+				num_values = len(half_hour_intervals)
 
-			# Step 3: Calculate the average
-			average = total_sum / num_values
+				# Step 3: Calculate the average
+				average = total_sum / num_values
+			
+
+		#print(average)
 
 		return(average)
 
+		# Print the results
+		#for timestamp, average_value in half_hour_intervals.items():
+			#print(f"Timestamp: {timestamp}, Average Value: {average_value}")
+
+
+
 	def halfhour_calculation(self, timestamps,values):
+
+
 		if not timestamps:
-			return float('nan')
-		
-		# Find the earliest timestamp
-		earliest_timestamp = min(timestamps)
+			mean_hr = float('nan')
 
-		# Define the 30-minute interval in seconds
-		interval_seconds = 30 * 60  # 30 minutes * 60 seconds/minute
-
-		# Initialize a list to store values at intervals
-		values_at_intervals = []
-		timestamps_at_intervals = []
-
-		# Iterate through timestamps and extract values at 30-minute intervals
-		current_timestamp = earliest_timestamp
-		current_index = 0
-
-		while current_index < len(timestamps):
-			if timestamps[current_index] >= current_timestamp:
-				values_at_intervals.append(values[current_index])
-				timestamps_at_intervals.append(timestamps[current_index])
-				current_timestamp += interval_seconds
-
-			else:
-				current_index += 1
-
-		timestamps_at_intervals, values_at_intervals = self.hr_filtering(timestamps_at_intervals,values_at_intervals)
-
-		#print('val at intervals', values_at_intervals)
-		timestamps_repti = [arrow.get(ts) for ts in timestamps_at_intervals]
-		#print('timestamps',timestamps_repti)
-
-		if values_at_intervals:
-			mean_hr = sum(values_at_intervals) / len(values_at_intervals)
-			#print(mean_hr)
 		else:
-			print('Not available data')
+
+			# Find the earliest timestamp
+			earliest_timestamp = min(timestamps)
+
+			# Define the 30-minute interval in seconds
+			interval_seconds = 30 * 60  # 30 minutes * 60 seconds/minute
+
+			# Initialize a list to store values at intervals
+			values_at_intervals = []
+			timestamps_at_intervals = []
+
+			# Iterate through timestamps and extract values at 30-minute intervals
+			current_timestamp = earliest_timestamp
+			current_index = 0
+
+			while current_index < len(timestamps):
+				if timestamps[current_index] >= current_timestamp:
+					values_at_intervals.append(values[current_index])
+					timestamps_at_intervals.append(timestamps[current_index])
+					current_timestamp += interval_seconds
+
+				else:
+					current_index += 1
+
+			timestamps_at_intervals, values_at_intervals = self.hr_filtering(timestamps_at_intervals,values_at_intervals)
+
+			#print('val at intervals', values_at_intervals)
+			timestamps_repti = [arrow.get(ts) for ts in timestamps_at_intervals]
+			#print('timestamps',timestamps_repti)
+
+			#print('------------------------------------')
+
+			if values_at_intervals:
+				mean_hr = sum(values_at_intervals) / len(values_at_intervals)
+				#print(mean_hr)
+			else:
+				print('Not available data')
 
 		return(mean_hr)
 
 
 	def scale_data_extractor(self, data):
+
 		# Initialize dictionaries for each measurement type
+
 		measurement_types = {
 		"weight": [],
 		"fat_mass": [],
@@ -328,6 +403,7 @@ class Data_Handler(object):
 			bone_mass_value = None
 
 			for measure in data_tuple:
+
 				if measure.type == MeasureType.WEIGHT:
 					weight_value = measure.value * (10 ** measure.unit)
 				elif measure.type == MeasureType.FAT_MASS_WEIGHT:
@@ -346,26 +422,86 @@ class Data_Handler(object):
 			measurement_types["hydration"].append(hydration_value)
 			measurement_types["bone_mass"].append(bone_mass_value)
 
+
 		# List for measurements
 		weight = np.array(measurement_types["weight"])
 		fat_mass = np.array(measurement_types["fat_mass"])
 		muscle_mass = np.array(measurement_types["muscle_mass"])
 		hydration = np.array(measurement_types["hydration"])
 		bone_mass = np.array(measurement_types["bone_mass"])
+
 		return(weight, muscle_mass, bone_mass, fat_mass, hydration)
 
+
+
+	def hr_filtering(self, x, y):
+
+		# Create a dictionary to aggregate y-values for each unique x-value
+		data_dict = {}
+
+		for i in range(len(x)):
+			if x[i] not in data_dict:
+				data_dict[x[i]] = []
+			data_dict[x[i]].append(y[i])
+
+
+		# Calculate the average y-values for each unique x-value
+		timestamps = list(data_dict.keys())
+		values = [np.mean(data_dict[x_val]) for x_val in timestamps]
+
+		# Convert timestamps to integers
+
+		timestamps = [int(ts_str) for ts_str in timestamps]
+
+		#Deleting HR values at higher frequencies than 9min
+
+
+		try:
+			# Find the minimum timestamp
+			min_timestamp = min(timestamps)
+
+		except ValueError:
+			# Handle the case when the timestamps list is empty
+			min_timestamp = None
+
+
+		# Create new arrays for filtered timestamps and values
+		filtered_timestamps = []
+		filtered_values = []
+
+
+		if min_timestamp is not None:
+			filtered_timestamps = [min_timestamp]
+			filtered_values = [values[0]]
+
+		for i in range(1, len(timestamps)):
+			time_diff = (timestamps[i] - filtered_timestamps[-1])  # Calculate time difference in seconds
+			if time_diff >= 540:  # 9 minutes in seconds
+				filtered_timestamps.append(timestamps[i])
+				filtered_values.append(values[i])
+
+
+		return(filtered_timestamps, filtered_values)
+
+
 	def str_to_float(self, number, unit):
+
 		number = str(number)
 		number = number[:unit] + "." + number[unit:] 
 		number = float(number)
+
 		return(number)
 
 	# The following function is called when there are higher granularity data but not averages
 	def backup_data(self, value1 = None, value2 = None):
+
 		value = [v1 if (v2 is None or np.isnan(v2) or v2 == 0) else v2 for v1, v2 in zip(value1, value2)]
+
 		return(value)
 
+
 	#The following function is to extract the data of the last week from all the values since registration
+
 	def values_dates_intersection(self, dates = None, start_date = None, end_date = None, values = None):
 
 		dates = [date_value.datetime if isinstance(date_value, arrow.Arrow) else date_value for date_value in dates]
@@ -384,14 +520,20 @@ class Data_Handler(object):
 
 		#print(filtered_dates)
 		#print(type(filtered_dates[0]))
+
+
 		return(filtered_dates, filtered_values)
 	
 	# The following function is to understand the weekly devices usage during the week
 	def usage_understanding(self, start_date = None, end_date = None, start_date_scale = None, sleep_u = None, watch_u = None, scale_u = None):
+
+		print('USAAAAAAAAAAGE')
+
 		usage = {}
 
 		day_diff = (end_date - start_date).days + 1
 		day_diff_scale = (end_date - start_date_scale).days + 1
+
 
 		print(sleep_u)
 		print(watch_u)
@@ -414,7 +556,9 @@ class Data_Handler(object):
 		rule_watch = day_diff - total_watch
 		rule_scale = day_diff_scale - total_scale
 
+
 		# Usage understanding for sleep
+
 		if rule_sleep <= 1:
 			usage['Sleep Mat'] = 'High'
 		elif rule_sleep >1 and rule_sleep <=2:
@@ -436,5 +580,79 @@ class Data_Handler(object):
 		else:
 			usage['Scale'] = 'Low'
 
+
+
 		print(usage)
 		return(usage)
+	
+	def calculate_usage(self, start_date = None, end_date = None, dates = None, values = None, device = None):
+		start_date = np.datetime64(start_date.datetime)
+		end_date = np.datetime64(end_date.datetime)		
+		# Filter dates and values within the specified range
+		if len(dates) == 0:
+			date_diff = (end_date - start_date).astype('timedelta64[D]').item().days
+			filtered_dates = np.full(date_diff, np.nan)  
+			filtered_values = np.full(date_diff, np.nan)
+		else:
+			mask = (dates >= start_date) & (dates <= end_date)
+			filtered_dates = np.compress(mask, dates)
+			filtered_values = np.array(values)[mask]
+			filtered_values = np.array([v if v is not None else np.nan for v in np.array(values)[mask]], dtype=float)
+			#filtered_values = np.array([v if isinstance(v, (int, float)) else np.nan for v in filtered_values], dtype=float)
+
+		# Calculate non-NaN values count and percentage
+		non_nan_count = np.count_nonzero(~np.isnan(filtered_values))
+		total_count =(end_date - start_date).astype('timedelta64[D]').item().days
+		non_nan_percentage = (non_nan_count / total_count) * 100 if total_count > 0 else 0
+
+		if device == 'scale':
+			upper_tresh = 20
+			mid_thresh = 7
+		else:
+			upper_tresh = 85
+			mid_thresh = 60
+
+		
+
+		# Determine usage level based on the non-NaN percentage
+		if non_nan_percentage > upper_tresh:
+			usage = "high"
+		elif mid_thresh <= non_nan_percentage <= upper_tresh:
+			usage = "medium"
+		else:
+			usage = "low"
+
+		print({
+			"filtered_dates": filtered_dates.tolist(),
+			"filtered_values": filtered_values.tolist(),
+			"non_nan_count": non_nan_count,
+			"usage": usage
+		})
+		# Return results
+		return {
+			"filtered_dates": filtered_dates.tolist(),
+			"filtered_values": filtered_values.tolist(),
+			"non_nan_count": non_nan_count,
+			"usage": usage
+		}
+
+
+
+
+
+		
+
+
+
+
+
+
+
+
+
+
+
+			
+
+
+

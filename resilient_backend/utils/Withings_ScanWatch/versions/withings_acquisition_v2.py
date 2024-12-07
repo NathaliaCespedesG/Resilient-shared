@@ -905,7 +905,7 @@ class Devices_OAuth2flow(object):
 		print('self.AP_Sleep_table:', self.AP_Sleep_table)
 
 		#Scale
-		self.Weight_table = (self.current_weight,self.weight,[])
+		self.Weight_table = (self.current_weight,self.monthly_scale_data['weight'],[])
 		print('self.Weight_table:', self.Weight_table)
 
 		#ScanWatch
@@ -917,73 +917,45 @@ class Devices_OAuth2flow(object):
 
 	def usage_levels(self):
 		print('Here in usages')
-
 		#Date selection according to the type of the report
 		if self.report_type == 1:
 			start_date = arrow.utcnow().shift(days = self.starting_day_c) 
 			end_date = arrow.utcnow().shift(days = self.ending_day_c)
 			start_date_scale = arrow.utcnow().shift(days = self.starting_day_p-8) 
-
 			# Data from sensors for report type = 1
 			sleep_u = self.hr_mean_bu
 			watch_u = self.activity_data['steps']
 			scale_u = self.weight
 
 		if self.report_type == 0:
-			start_date = arrow.utcnow().shift(days = self.starting_day_p) 
-			end_date = arrow.utcnow().shift(days = self.ending_day_p)
-
-
-			start_date_scale = arrow.utcnow().shift(days = self.starting_day_p-8) 
-
-			#print('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
-			#print(start_date_scale)
-
-			#Values from last week for scanwatch and sleepmat
-			sleep_u = self.current_sleep_hr
-			watch_u = self.current_daily_hr
-
-			#print(watch_u)
-			#print(self.final_hr)
-
+			start_date = arrow.utcnow().shift(days = self.starting_day_p).replace(hour=0, minute=0, second=0, microsecond=0)
+			end_date = arrow.utcnow().shift(days = self.ending_day_p).replace(hour=0, minute=0, second=0, microsecond=0)
+			start_date_scale = arrow.utcnow().shift(days = self.starting_day_p-8).replace(hour=0, minute=0, second=0, microsecond=0)		
 			#Values for the last two weeks of scale to calculate the usage 
-			scale_u = self.data_utils.values_dates_intersection(dates = self.monthly_scale_data['date'], start_date = start_date_scale, end_date = end_date, values = self.weight_m)
-	
-
+			dates_scale_usage,scale_u = self.data_utils.values_dates_intersection(dates = self.monthly_scale_data['date'], start_date = start_date_scale, end_date = end_date, values = self.monthly_scale_data['weight'])
 		# Usage
-	
-		usage = self.data_utils.usage_understanding(start_date = start_date, end_date = end_date,  start_date_scale = start_date_scale,  sleep_u = sleep_u, watch_u = watch_u, scale_u = scale_u)
-		
+		usage_watch = self.data_utils.calculate_usage(start_date = start_date, end_date = end_date, dates = self.current_dates_daily_hr, values = self.current_daily_hr, device = 'watch')
+		usage_sleepmat = self.data_utils.calculate_usage(start_date = start_date, end_date = end_date, dates = self.current_dates_sleep_hr, values = self.current_sleep_hr, device = 'sleepmat')
+		usage_scale = self.data_utils.calculate_usage(start_date = start_date, end_date = end_date, dates = dates_scale_usage, values = scale_u, device = 'scale')
+		# 
 		#Battery 
 		self.battery_report = self.battery
-
 		#Last date of usage
-
 		try:
 			watch_last_usage =  self.activity_data['date'][-1]
 		except IndexError:
 			watch_last_usage =  None
-
 		try:
 			scale_last_usage =  self.last_scale[0]
 		except IndexError:
 			scale_last_usage =  None
-		
 		try:
 			sleep_last_usage =  self.last_sleep
 		except IndexError:
 			sleep_last_usage =  None
-
-		
-
 		self.last_day_use = {'Watch': watch_last_usage, 'Scale': scale_last_usage, 'Sleep': sleep_last_usage} 
-		print(usage)
-		print(self.last_day_use)
-		print(self.battery)
-
-
-		self.database.SM.load_usage( user_id = self.id_user, start_date = start_date, end_date = end_date, sleep_usage = usage['Sleep Mat'], sleep_battery = self.battery['Sleep Monitor'], sleep_lastday = self.last_day_use['Sleep'], watch_usage = usage['Watch'],
-									 watch_battery = self.battery['Activity Tracker'], watch_lastday = self.last_day_use['Watch'], scale_usage = usage['Scale'], scale_battery = self.battery['Scale'], scale_lastday = self.last_day_use['Scale'])
+		self.database.SM.load_usage( user_id = self.id_user, start_date = start_date, end_date = end_date, sleep_usage = usage_sleepmat['usage'], sleep_battery = self.battery['Sleep Monitor'], sleep_lastday = self.last_day_use['Sleep'], watch_usage = usage_watch['usage'],
+									 watch_battery = self.battery['Activity Tracker'], watch_lastday = self.last_day_use['Watch'], scale_usage = usage_scale['usage'], scale_battery = self.battery['Scale'], scale_lastday = self.last_day_use['Scale'])
 
 	#The following functions will be used to get the users' raw data. Please keep in mind that you need to activate and deactivate
 	#the device you want to acquiere the raw data from
@@ -1085,5 +1057,3 @@ class Devices_OAuth2flow(object):
 
 if __name__ == "__main__":
     Devices_OAuth2flow.main()
-
-
