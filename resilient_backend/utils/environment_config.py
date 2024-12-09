@@ -15,7 +15,8 @@ class EnvironmentConfig():
             'BOLD_FONT_PATH': config('PDF_BOLD_FONT_PATH', default='/usr/share/fonts/truetype/msttcorefonts/Arial_Bold.ttf', cast=str),
             'WITHINGS_CLIENT_ID': config('WITHINGS_CLIENT_ID', default='secret-client-id', cast=str),
             'WITHINGS_COSTUMER_SECRET': config('WITHINGS_COSTUMER_SECRET', default='costumer-secret', cast=str),
-            'WITHINGS_CALLBACK_URL': config('WITHINGS_CALLBACK_URL', default='https://resilient.ukdri.care/auth/withings-connected/', cast=str)
+            'WITHINGS_CALLBACK_URL': config('WITHINGS_CALLBACK_URL', default='https://resilient.ukdri.care/auth/withings-connected/', cast=str),
+            'IMGS_PATH': config('IMGS_PATH', default='img', cast=str)
         }
         self.__config['BACKEND_URL'] = self.sanitize_url( self.__config['BACKEND_URL'])
         return

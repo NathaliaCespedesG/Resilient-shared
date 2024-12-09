@@ -170,8 +170,8 @@ class Resilient(object):
                 #reports_resilient.usage_levels()
                 self.reports_resilient.remove_images()
                 print('After remove_images')
-                self.reports_resilient.db_filling()
-                print('After db_filling')
+                #self.reports_resilient.db_filling()
+                print('Skipped db_filling')
                 if self.version == "v2":
                     self.reports_resilient.db_api_filling()
                     print('After db_api_filling')
