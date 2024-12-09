@@ -58,17 +58,18 @@ class PDF_generation(object):
 	# Function to create the title page
 		
 	def id_string(self, x):
-		
-		if x.endswith('s'):
-			base_id = x.rstrip('s')
-		else:
-			base_id = x
-		formatted_id = '{:03d}'.format(int(base_id))
-		if x.endswith('s'):
-			formatted_id += 's'
-		else:
-			formatted_id += 'p'
-
+		try:		
+			if x.endswith('s'):
+				base_id = x.rstrip('s')
+			else:
+				base_id = x
+			formatted_id = '{:03d}'.format(int(base_id))
+			if x.endswith('s'):
+				formatted_id += 's'
+			else:
+				formatted_id += 'p'
+		except:
+			formatted_id = x
 			
 		return formatted_id
 
@@ -327,16 +328,11 @@ class PDF_generation(object):
 
 
 	def document_generation(self):
-
-
 		# Path where saving the reports
-
-		
 		document_file = self.path + "/"+ (self.id +"_report.pdf")
-		
-		# Data for the table
-		
 
+		# Data for the table
+		print('self day hr', self.day_hr)
 		hr_c, hr_p, hr_m = self.averages_data(self.day_hr[0],self.day_hr[1], self.day_hr[2], type_d = 'hr')
 		nhr_c, nhr_p, nhr_m = self.averages_data(self.night_hr[0],self.night_hr[1], self.night_hr[2], type_d = 'nhr' )
 		rr_c, rr_p, rr_m = self.averages_data(self.night_rr[0],self.night_rr[1], self.night_rr[2], type_d = 'rr' )
