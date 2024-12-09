@@ -88,7 +88,7 @@ class PDF_generation(object):
 
 
 
-		if val1 == [] or (np.all(np.isnan(val1))) or (np.all(val1==0)) or np.all(np.logical_or(val1 == 0, np.isnan(val1))):
+		if val1.size or (np.all(np.isnan(val1))) or (np.all(val1==0)) or np.all(np.logical_or(val1 == 0, np.isnan(val1))):
 			self.mean_val1 = 'N/A'
 			self.sd_val1 = ''
 			self.var_1 = self.mean_val1
