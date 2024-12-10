@@ -3,3 +3,5 @@ venv/*
 __init__.py
 .env
 *.credentials
+*.pdf
+*.csv
