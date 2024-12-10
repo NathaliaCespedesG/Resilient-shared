@@ -1,9 +1,10 @@
 from ...environment_config import EnvironmentConfig
-from datetime import datetime, timezone
+import datetime
 import arrow
 import math
 import numpy as np
 import requests
+from api.models import ScanWatchIntraActivity, ScanWatchSummary, Device, User, SleepmatSummary, SleepmatIntraActivity, Scale
 
 class Database_API(object):
     def __init__(self):
@@ -20,10 +21,8 @@ class Database_API(object):
                 "password_hash": password_hash,
                 "withings_credentials_path": credential_path
                 }
-        print(data)
 
         response = requests.post(url, json = data)
-        print('HIII')
         if response.status_code == 400:
             print('Not working')
            
@@ -81,7 +80,6 @@ class Database_API(object):
     #PATCH users table
     def update_devices_in_user(self, user_uid = None, scale_id = None, scanwatch_id = None, sleepmat_id = None):
         url = self.backend_url + '/api/user/' + user_uid +'/'
-        print(scale_id)
         data = {
              "scale_device": scale_id,
              "scanwatch_device":scanwatch_id,
@@ -165,8 +163,6 @@ class Database_API(object):
             print('GET request successful')
             # Accessing the response data
             scanwatch_dict = response.json()  # Assuming the response is JSON data
-            #print(scanwatch_dict)
-                
         else:
             # Unsuccessful response
             print('GET request failed:', response.status_code)
@@ -264,35 +260,74 @@ class Database_API(object):
     
     def upload_scanwatch_summary_data(self, user = None, watch_id= None, date = None, hr_i = None,
                                       cal_i = None, steps_i = None, hr_max_i = None, hr_min_i = None):
-        url = self.backend_url + '/api/scanwatches/summary/'
+
+        try:
+            user_instance = User.objects.get(id=user)
+        except User.DoesNotExist:
+            print(f"User with username {user} does not exist.")
+            return
+        
+        try:
+            device_instance = Device.objects.get(id=watch_id)
+        except Device.DoesNotExist:
+            print(f"Device with ID {watch_id} does not exist.")
+            return
+        
         if watch_id is not None:
+            # Fetch existing dates for the given user and device
+            existing_dates = set(
+                ScanWatchSummary.objects.filter(user=user_instance, device=device_instance)
+                .values_list("date", flat=True)
+            )
+
+            instances = []
             for j in range(len(date)):
                 date_s = date[j].isoformat()
-                date_s = date_s[:-15]
+                date_s = date_s[:-15].split('T')[0]
+
+                # Skip if date already exists
+                if datetime.date.fromisoformat(date_s) in existing_dates:
+                    continue
+
                 # Convert 'nan' values to None
                 average_heart_rate = hr_i[j]
                 calories = cal_i[j]
                 steps = steps_i[j]
                 hr_max = hr_max_i[j]
                 hr_min = hr_min_i[j]
+
+                instances.append(ScanWatchSummary(
+                    user=user_instance,
+                    device=device_instance,
+                    date=date_s,
+                    average_heart_rate=None if math.isnan(float(average_heart_rate)) else float(average_heart_rate),
+                    calories= None if math.isnan(float(calories)) else float(calories),
+                    steps= None if math.isnan(float(steps)) else float(steps),
+                    hr_max= None if math.isnan(float(hr_max)) else float(hr_max),
+                    hr_min= None if math.isnan(float(hr_min)) else float(hr_min)
+                ))
         
-                data ={
-                    "device": watch_id,
-                    "user": user,
-                    "date": date_s,
-                    "average_heart_rate": None if math.isnan(float(average_heart_rate)) else float(average_heart_rate),
-                    "calories": None if math.isnan(float(calories)) else float(calories),
-                    "steps": None if math.isnan(float(steps)) else float(steps),
-                    "hr_max": None if math.isnan(float(hr_max)) else float(hr_max),
-                    "hr_min": None if math.isnan(float(hr_min)) else float(hr_min)
-                }
-                
-                response = requests.post(url, json=data)
+                # response = requests.post(url, json=data)
+
+            if instances:
+                ScanWatchSummary.objects.bulk_create(instances)
+                print(f"{len(instances)} records saved successfully in ScanWatchSummary.")
 
     def upload_intra_scanwatch_summary_data(self,  user = None, watch_id= None, date_hr_i = None, hr_i = None,
                                       date_calories_i = None,cal_i = None, date_steps_i= None, steps_i = None):
 
         url = self.backend_url + '/api/scanwatches/intra_activity/'
+        try:
+            user_instance = User.objects.get(id=user)
+        except User.DoesNotExist:
+            print(f"User with username {user} does not exist.")
+            return
+        
+        try:
+            device_instance = Device.objects.get(id=watch_id)
+        except Device.DoesNotExist:
+            print(f"Device with ID {watch_id} does not exist.")
+            return
         
         #Convert to homogenous lists
         max_size = max(len(date_hr_i), len(date_steps_i), len(date_calories_i))
@@ -309,32 +344,55 @@ class Database_API(object):
             cal_i = np.append(cal_i, [np.nan] * (max_size - len(cal_i)))
         
         if watch_id is not None:
-            for j in range(len(date_hr_i)):
-                heart_rate = None if math.isnan(float(hr_i[j])) else float(hr_i[j]) 
-                date_heart_rate = None if math.isnan(float(date_hr_i[j])) else float(date_hr_i[j]) 
-                date_steps = None if math.isnan(float(date_steps_i[j])) else float(date_steps_i[j]) 
-                steps = None if math.isnan(float(steps_i[j])) else float(steps_i[j]) 
-                calories = None if math.isnan(float(cal_i[j])) else float(cal_i[j]) 
-                date_calories = None if math.isnan(float(date_calories_i[j])) else float(date_calories_i[j]) 
-                data ={
-                    "user":user,
-                    "device": watch_id,
-                    "heart_rate": heart_rate,
-                    "date_heart_rate": date_heart_rate,
-                    "steps": steps,
-                    "date_steps": date_steps,
-                    "calories": calories,
-                    "date_calories": date_calories
-                    }
-                
-                #print(data)
-                response = requests.post(url, json=data)
+            # Fetch existing dates for the given user and device
+            existing_dates = set(
+                ScanWatchIntraActivity.objects.filter(user=user_instance, device=device_instance)
+                .values_list("date_heart_rate", flat=True)
+            )
+
+            instances = []
+            for j in range(max_size):
+                date_heart_rate_s = None if math.isnan(float(date_hr_i[j])) else float(date_hr_i[j])
+
+                # Skip if date already exists
+                if date_heart_rate_s in existing_dates:
+                    continue
+
+                instances.append(ScanWatchIntraActivity(
+                    user=user_instance,
+                    device=device_instance,
+                    heart_rate=None if math.isnan(float(hr_i[j])) else float(hr_i[j]),
+                    date_heart_rate=date_heart_rate_s,
+                    steps=None if math.isnan(float(steps_i[j])) else float(steps_i[j]),
+                    date_steps=None if math.isnan(float(date_steps_i[j])) else float(date_steps_i[j]),
+                    calories=None if math.isnan(float(cal_i[j])) else float(cal_i[j]),
+                    date_calories=None if math.isnan(float(date_calories_i[j])) else float(date_calories_i[j]),
+                ))
+            # Use bulk_create to save all instances at once
+            if instances:
+                ScanWatchIntraActivity.objects.bulk_create(instances)
+                print(f"{len(instances)} records saved successfully in ScanWatchIntraActivity.")
+
+                #response = requests.post(url, json=data)
                 
     def upload_sleep_summary_data(self, user = None, sleep_id = None, date = None, bd = None, dsd = None, dts = None,
                                    dtw = None, hr = None, lsd = None, rsd = None, rr = None, ss = None, wc = None,
                                    wd = None, tst = None, tib = None, ab = None, apn = None, obc = None, start_date = None,
                                    end_date = None, hr_date_ap = None, hr_ap = None, rr_date_ap = None, rr_ap = None):
         url = self.backend_url + '/api/sleepmats/summary/'
+
+        try:
+            user_instance = User.objects.get(id=user)
+        except User.DoesNotExist:
+            print(f"User with username {user} does not exist.")
+            return
+        
+        try:
+            device_instance = Device.objects.get(id=sleep_id)
+        except Device.DoesNotExist:
+            print(f"Device with ID {sleep_id} does not exist.")
+            return
+
         max_size = max(len(hr_date_ap), len(rr_date_ap), len(date))
         if len(hr_date_ap) < max_size:
             hr_date_ap = np.append(hr_date_ap, [None] * (max_size - len(hr_date_ap)))
@@ -343,14 +401,25 @@ class Database_API(object):
             rr_ap = np.append(rr_ap, [np.nan] * (max_size - len(rr_ap)))
       
         if sleep_id is not None:
+            # Fetch existing dates for the given user and device
+            existing_dates = set(
+                SleepmatSummary.objects.filter(user=user_instance, device=device_instance)
+                .values_list("start_date", flat=True)
+            )
 
+            instances = []
             for j in range(len(date)):
+                start_date_s = start_date[j].isoformat() if start_date[j] is not None else None
+                
+                # Skip if date already exists
+                if datetime.datetime.fromisoformat(start_date_s) in existing_dates:
+                    continue
+                
                 date_s = date[j].isoformat()
                 date_s = date_s[:-15]
-                start_date_s = start_date[j].isoformat() if start_date[j] is not None else None
                 end_date_s = end_date[j].isoformat() if end_date[j] is not None else None
-                date_hr_sleep_ap = hr_date_ap[j].isoformat() if hr_date_ap[j] is not None else None
-                date_rr_sleep_ap = rr_date_ap[j].isoformat() if rr_date_ap[j] is not None else None
+                date_hr_sleep_ap = hr_date_ap[j].isoformat().split('T')[0] if hr_date_ap[j] is not None else None
+                date_rr_sleep_ap = rr_date_ap[j].isoformat().split('T')[0] if rr_date_ap[j] is not None else None
 
                 breathing_disturbances = bd[j] 
                 deep_sleep_duration = dsd[j]
@@ -368,43 +437,59 @@ class Database_API(object):
                 awake_in_bed = ab[j]
                 apnea = apn[j]
                 out_of_bed_count = obc[j]
-                hr_af = hr_ap[j]
-                rr_af = rr_ap[j]
+                hr_af = hr_ap[j] if not math.isnan(hr_ap[j]) else None
+                rr_af = rr_ap[j] if not math.isnan(rr_ap[j]) else None
 
-                data ={
-                    "device": sleep_id,
-                    "user": user,
-                    "date": date_s,
-                    "breathing_disturbances" : breathing_disturbances,
-                    "deep_sleep_duration" : deep_sleep_duration,
-                    "duration_to_sleep" : duration_to_sleep,
-                    "duration_to_wakeup" : duration_to_wakeup,
-                    "average_heart_rate" : average_heart_rate,
-                    "light_sleep_duration" : light_sleep_duration,
-                    "rem_sleep_duration" : rem_sleep_duration,
-                    "average_rr" : average_rr,
-                    "sleep_score" : sleep_score,
-                    "wakeup_count" : wakeup_count,
-                    "wakeup_duration" : wakeup_duration,
-                    "total_sleep_time": total_sleep_time,
-                    "total_time_in_bed": total_time_in_bed,
-                    "awake_in_bed":awake_in_bed,
-                    "apnea": apnea,
-                    "out_of_bed_count":out_of_bed_count,
-                    "start_date":start_date_s,
-                    "end_date":end_date_s,
-                    "hr_date_af": date_hr_sleep_ap,
-                    "hr_af": None if np.isnan(hr_af) else hr_af, 
-                    "hr_date_rr": date_rr_sleep_ap,
-                    "hr_rr":None if np.isnan(rr_af) else rr_af
-                    }
-                response = requests.post(url, json=data)
-                print(response)
+                instances.append(SleepmatSummary(
+                    user=user_instance,
+                    device=device_instance,
+                    date=date_s,
+                    breathing_disturbances=breathing_disturbances,
+                    deep_sleep_duration=deep_sleep_duration,
+                    duration_to_sleep=duration_to_sleep,
+                    duration_to_wakeup=duration_to_wakeup,
+                    average_heart_rate=average_heart_rate,
+                    light_sleep_duration=light_sleep_duration,
+                    rem_sleep_duration=rem_sleep_duration,
+                    average_rr=average_rr,
+                    sleep_score=sleep_score,
+                    wakeup_count=wakeup_count,
+                    wakeup_duration=wakeup_duration,
+                    total_sleep_time=total_sleep_time,
+                    total_time_in_bed=total_time_in_bed,
+                    awake_in_bed=awake_in_bed,
+                    apnea=apnea,
+                    out_of_bed_count=out_of_bed_count,
+                    start_date=start_date_s,
+                    end_date=end_date_s,
+                    hr_date_af=date_hr_sleep_ap,
+                    hr_af=hr_af,
+                    hr_date_rr=date_rr_sleep_ap,
+                    hr_rr=rr_af
+                ))
 
+            # Use bulk_create to save all instances at once
+            if instances:
+                SleepmatSummary.objects.bulk_create(instances)
+                print(f"{len(instances)} records saved successfully in SleepMatSummary.")
+
+                #response = requests.post(url, json=data)
 
     def upload_intra_sleep_summary_data(self, user = None, sleep_id = None, start_date = None, end_date = None, ss = None,
                                         date_hr = None, hr = None, date_rr = None, rr = None, date_s = None, sn = None, date_sddn = None, sdnn_1 = None):
         url = self.backend_url + '/api/sleepmats/intraactivity/'
+
+        try:
+            user_instance = User.objects.get(id=user)
+        except User.DoesNotExist:
+            print(f"User with username {user} does not exist.")
+            return
+        
+        try:
+            device_instance = Device.objects.get(id=sleep_id)
+        except Device.DoesNotExist:
+            print(f"Device with ID {sleep_id} does not exist.")
+            return
         
         max_size = max(len(start_date), len(date_hr))
         
@@ -414,10 +499,21 @@ class Database_API(object):
             ss = np.append(ss, [np.nan] * (max_size - len(ss)))
             
         if sleep_id is not None:
+            # Fetch existing dates for the given user and device
+            existing_dates = set(
+                SleepmatIntraActivity.objects.filter(user=user_instance, device=device_instance)
+                .values_list("start_date", flat=True)
+            )
+
+            instances = []
             for j in range(max_size):
-                print(start_date[j])
-                # Convert 'nan' values to None
                 start_date_s = None if math.isnan(start_date[j]) else float(start_date[j]) 
+                
+                # Skip if date already exists
+                if start_date_s in existing_dates:
+                    continue
+
+                # Convert 'nan' values to None
                 end_date_s = None if math.isnan(float(end_date[j])) else float(end_date[j]) 
                 sleep_state_s = None if math.isnan(float(ss[j])) else int(ss[j]) 
                 date_heart_rate = None if math.isnan(float(date_hr[j])) else float(date_hr[j])
@@ -428,49 +524,76 @@ class Database_API(object):
                 snoring = None  if math.isnan(float(sn[j])) else float(sn[j])
                 date_sdnn_1 = None  if math.isnan(float(date_sddn[j])) else float(date_sddn[j])
                 sdnn_1_1 = None  if math.isnan(float(sdnn_1[j])) else float(sdnn_1[j])
-                data ={
-                    "user": user, 
-                    "device": sleep_id,
-                    "start_date": start_date_s,
-                    "end_date":end_date_s, 
-                    "sleep_state": sleep_state_s, 
-                    "date_heart_rate": date_heart_rate, 
-                    "heart_rate": heart_rate,
-                    "date_respiration_rate": date_respiration_rate,
-                    "respiration_rate": respiration_rate,
-                    "date_snoring": date_snoring,
-                    "snoring" : snoring,
-                    "date_sdnn_1" : date_sdnn_1,
-                    "sdnn_1": sdnn_1_1
-                    }
-                
-                response = requests.post(url, json=data)
+
+                instances.append(SleepmatIntraActivity(
+                    user=user_instance,
+                    device=device_instance,
+                    start_date=start_date_s,
+                    end_date=end_date_s,
+                    sleep_state=sleep_state_s,
+                    date_heart_rate=date_heart_rate,
+                    heart_rate=heart_rate,
+                    date_respiration_rate=date_respiration_rate,
+                    respiration_rate=respiration_rate,
+                    date_snoring=date_snoring,
+                    snoring=snoring,
+                    date_sdnn_1=date_sdnn_1,
+                    sdnn_1=sdnn_1_1
+                ))
+
+                # response = requests.post(url, json=data)
+            
+            if instances:
+                SleepmatIntraActivity.objects.bulk_create(instances)
+                print(f"{len(instances)} records saved successfully in SleepMatIntraActivity.")
     
     def upload_scale_data(self, user = None, scale_id = None, date = None, weight = None, muscle_mass= None,
                           bone_mass = None, fat_mass = None):
         url = self.backend_url + '/api/scales/'
 
+        try:
+            user_instance = User.objects.get(id=user)
+        except User.DoesNotExist:
+            print(f"User with username {user} does not exist.")
+            return
+        
+        try:
+            device_instance = Device.objects.get(id=scale_id)
+        except Device.DoesNotExist:
+            print(f"Device with ID {scale_id} does not exist.")
+            return
+
         if scale_id is not None:
+            # Fetch existing dates for the given user and device
+            existing_dates = set(
+                Scale.objects.filter(user=user_instance, device=device_instance)
+                .values_list("date", flat=True)
+            )
+
+            instances = []
             for j in range(len(date)):
-                date = date[j].isoformat()
-                # Convert 'nan' values to None
+                date_s = date[j].isoformat()
+                # Skip if date already exists
+                if datetime.datetime.fromisoformat(date_s) in existing_dates:
+                    continue
+
                 weight_s = None if math.isnan(weight[j]) else float(weight[j])  
                 muscle_mass_s = None if math.isnan(muscle_mass[j]) else float(muscle_mass[j]) 
                 bone_mass_s = None if math.isnan(bone_mass[j]) else float(bone_mass[j]) 
                 fat_mass_s = None if math.isnan(fat_mass[j]) else float(fat_mass[j])
 
-                print(muscle_mass)
-        
-                data ={
-                    "device": scale_id,
-                    "user": user, 
-                    "date": date,
-                    "weight": weight_s,
-                    "muscle_mass": muscle_mass_s,
-                    "bone_mass": bone_mass_s,
-                    'fat_mass': fat_mass_s, 
-                    }
-                print(data)
-                response = requests.post(url, json=data)
-                print(response)
+                instances.append(Scale(
+                    user=user_instance,
+                    device=device_instance,
+                    date=date_s,
+                    weight=weight_s,
+                    muscle_mass=muscle_mass_s,
+                    bone_mass=bone_mass_s,
+                    fat_mass=fat_mass_s
+                ))
+
+            # Bulk create only non-duplicate instances
+            if instances:
+                Scale.objects.bulk_create(instances)
+                print(f"{len(instances)} records saved successfully in Scale.")
     
