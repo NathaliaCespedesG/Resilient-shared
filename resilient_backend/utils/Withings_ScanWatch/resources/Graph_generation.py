@@ -183,7 +183,6 @@ class Graph_generator(object):
 					plt.gca().set_title('Sleep Heart Rate', fontsize = 14, loc = 'left',pad = 30, fontweight= 600, fontdict = self.font)
 					plt.ylabel("Heart Rate (bpm)", fontsize = 11, fontdict = self.font)
 					if j:
-						print(j)
 						j = np.array(j)
 						j_ticks = j[~np.isnan(j)]
 						plt.yticks(range(int(np.min(j_ticks)), int(np.max(j_ticks )) + 1, 5))			
@@ -193,7 +192,6 @@ class Graph_generator(object):
 					plt.gca().set_title('Day Heart Rate', fontsize = 14, loc = 'left',pad = 30, fontweight= 600, fontdict = self.font)
 					plt.ylabel("Heart Rate (bpm)", fontsize = 11, fontdict = self.font)
 					if j:
-						print(j)
 						j = np.array(j)
 						j_ticks = j[~np.isnan(j)]
 						try:
@@ -465,9 +463,7 @@ class Graph_generator(object):
 		rect2 = []
 		# x_limit calculation
 		x_lim_min = min(start_times)
-		#print('Min date', x_lim_min)
 		x_lim_max = max(end_times)
-		#print('Min date', x_lim_max)
 		legend_handles = {}
 		# Loop through each event and plot the colored rectangle
 		for start_time, end_time, amplitude in zip(start_times, end_times, amplitudes):

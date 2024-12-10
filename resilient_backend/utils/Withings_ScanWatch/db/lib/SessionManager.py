@@ -21,7 +21,6 @@ class DatabaseManager(object):
 
 
 	def load_Scale(self, time = None, weight = None, muscle_mass = None, bone_mass = None, fat_mass = None):
-
 		#Loading data
 		self.ScaleFile = open(self.scale_name, 'a')
 		for i in range (len(time)):
@@ -31,9 +30,6 @@ class DatabaseManager(object):
 		self.ScaleFile.close()
 
 	def load_ScanWatch(self, time = None, hr = None, calories = None, steps = None, hr_max = None, hr_min = None):
-
-		print(hr_min)
-	
 		#Loading data
 		self.ScanWatchfile = open(self.scanwatch_name, 'a')
 		for i in range (len(time)):
@@ -44,11 +40,9 @@ class DatabaseManager(object):
 
 	def load_SleepMat(self, time = None, bd = None, dsd = None, dts = None, dtw = None, hr = None, lsd = None, rsd = None, rr = None, ss = None,wpc = None, wpd = None,
 				   tst = None,ttb = None, awb = None, ap = None, obc = None, start_date = None, end_date = None, date_hr_ap = None, hr_ap = None, date_rr_ap = None, rr_ap = None):
-
 		#Loading data
 		self.SleepMatFile = open(self.sleepmat_name, 'a')
 		max_size = max(len(date_hr_ap), len(date_rr_ap), len(time))
-		print(date_hr_ap)
 		if len(date_hr_ap) < max_size:
 
 			date_hr_ap = np.append(date_hr_ap, [None] * (max_size - len(date_hr_ap)))
@@ -56,32 +50,21 @@ class DatabaseManager(object):
 			hr_ap = np.append(hr_ap, [np.nan] * (max_size - len(hr_ap)))
 			rr_ap = np.append(rr_ap, [np.nan] * (max_size - len(rr_ap)))
 
-		#print(len(time))
-		#print(len(date_hr_ap))
-		#print(len(date_rr_ap))
-		#print(len(hr_ap))
-		#print(len(rr_ap))
-		#print(hola)
 		for i in range (len(time)):
 			self.df_sleepsummary = self.df_sleepsummary.append({'date': time[i], 'Breathing disturbances': bd[i], 'Deep sleep duration': dsd[i], 'Duration to sleep': dts[i] , 'Duration to wakeup': dtw[i],
 								'HR average': hr[i], 'Light sleep duration': lsd[i], 'Rem sleep duration': rsd[i], 'RR average': rr[i], 'Sleep score': ss[i], 'Wake up count': wpc[i],
 								'Wake up duration': wpd[i], 'Total sleep time': tst[i], 'Total time in bed': ttb[i], 'Awake in bed': awb[i], 'Apnea': ap[i], 'Out of bed count': obc[i],
 								'start_date': start_date[i], 'end_date': end_date[i], 'date_hr_sleep_ap':date_hr_ap[i] , 'hr_sleep_ap':hr_ap[i], 'date_rr_sleep_ap':date_rr_ap[i], 'rr_sleep_ap':rr_ap[i]}, ignore_index=True)
 		self.df_sleepsummary.to_csv(self.sleepmat_name, index = False )
-
-	
 		self.SleepMatFile.close()
 
-
 	def load_SensorInfo(self, sensor = None, hash_deviceid = None, MAC_address = None):
-		
 		self.DevicesFile = open(self.devices_info, 'a')
 		for i in range (len(sensor)):
 
 			self.df_devices = self.df_devices.append({'Device': sensor[i], 'Hash_deviceid': hash_deviceid[i], 'MAC_address': MAC_address[i]}, ignore_index = True)
 		
 		self.df_devices.to_csv(self.devices_info, index = False )
-
 		self.DevicesFile.close()
 
 
@@ -118,10 +101,8 @@ class DatabaseManager(object):
 		self.ScanIntraFile.close()
 
 	def load_intra_sleep(self, start_date = None, end_date = None, ss = None, hr = None, hr_date = None, rr = None, rr_date = None, snoring = None, snoring_date = None, sdnn_1 = None, sdnn_1_date = None):
-
 		max_size = max(len(start_date), len(hr_date))
 		self.SleepIntraFile = open(self.sleepmat_intraday, 'a')
-		#print(hr)
 
 		if len(start_date) < max_size:
 
@@ -130,11 +111,8 @@ class DatabaseManager(object):
 			ss = np.append(ss, [np.nan] * (max_size - len(ss)))
 
 		for i in range(max_size):
-			#print('Here intra')
-
 			self.df_sleep_intra  = self.df_sleep_intra.append({'startdate': start_date[i], 'enddate': end_date[i], 'Sleep state':ss[i], 'Heart Rate date': hr_date[i], 'Heart Rate': hr[i] ,  'Respiration rate date': rr_date[i],
 			 													'Respiration rate': rr[i] , 'Snoring date': snoring_date[i], 'Snoring': snoring[i], 'sdnn_1 date': sdnn_1_date[i], 'sdnn_1': sdnn_1[i]} ,ignore_index = True)
-
 
 		self.df_sleep_intra.to_csv(self.sleepmat_intraday, index = False)
 		self.SleepIntraFile.close()
@@ -165,69 +143,53 @@ class DatabaseManager(object):
 
 
 	def set_User(self, US):
-
 		#User status
 		self.UserStatus = US
 
 	def set_date_report(self, date):
-
 		self.report_date = date
-
 		print(self.report_date)
 
 
 	def get_path(self):
-
 		return(self.user_folder)
 
 
 	def create_session(self):
-
 		#Create folders for each user
-
 		self.user_folder_wd = self.PH + "/" +"General" + "/" + str(self.UserStatus['id'])
 
 		self.user_folder = self.PH + "/" +"General" + "/" + str(self.UserStatus['id']) +"/"+ self.report_date
 
-
 		#Create folders for each user - testing purposes
-
-
-
-	
-
 		if not os.path.exists(self.user_folder):
 			os.makedirs(self.user_folder)
 
+		#self.create_files()
+		return
 
+	def create_files(self):
 		#Create sensors file
-
 		self.scale_name = self.user_folder_wd+ "/Scale.csv"
 		self.scanwatch_name = self.user_folder_wd + "/ScanWatch_summary.csv"
 		self.sleepmat_name = self.user_folder_wd + "/SleepMat_summary.csv"
-
 		self.devices_info = self.user_folder_wd+ "/Devices.csv"
 		self.usage_info = self.user_folder_wd+ "/Usage.csv"
 
 		#Create sensors file for higher granularity
-
 		self.scanwatch_intraday = self.user_folder_wd + "/ScanWatch_intra_activity.csv"
 		self.sleepmat_intraday = self.user_folder_wd + "/Sleepmat_intra_activity.csv"
-		
 
 		#Open the files to save the data
 		self.ScaleFile = open(self.scale_name, 'a+')
 		self.ScanWatchfile = open(self.scanwatch_name, 'a+')
 		self.SleepMatFile = open(self.sleepmat_name, "a+")
 		self.DevicesFile = open(self.devices_info, "w+")
-		
 		self.ScanIntraFile = open(self.scanwatch_intraday, "a+")
 		self.SleepIntraFile = open(self.sleepmat_intraday, "a+")
-
 		self.UsageFile = open(self.usage_info, "a+")
 
 		#Headers on devices files
-
 		self.df_devices = pd.DataFrame({'Device': [], 'Hash_deviceid': [], 'MAC_address': []} )
 		self.df_devices.to_csv(self.devices_info, index = False )
 
@@ -243,29 +205,23 @@ class DatabaseManager(object):
 			self.df_usage.to_csv(self.usage_info, index = False )
 
 		#Headers on each files
-
-		
 		try:
 			existing_data_hr = pd.read_csv(self.scanwatch_name)
 			self.df_scanwatch = existing_data_hr
-
 		except:
 			self.df_scanwatch = pd.DataFrame({'date': [], 'HR_Average': [], 'Calories': [], 'Steps': [], 'HR_min': [], 'HR_max':[]} )
 			self.df_scanwatch.to_csv(self.scanwatch_name, index = False )
-
 
 		try:
 			existing_data_scale = pd.read_csv(self.scale_name)
 			self.df_scale = existing_data_scale
 		except:
-
 			self.df_scale = pd.DataFrame({'date': [], 'Weight': [], 'Muscle mass': [], 'Bone mass': [] , 'Fat mass Weight': [] } )
 			self.df_scale.to_csv(self.scale_name, index = False )
 
 		try:
 			existing_data_sleep = pd.read_csv(self.sleepmat_name)
 			self.df_sleepsummary = existing_data_sleep
-
 		except:
 			self.df_sleepsummary = pd.DataFrame({'date': [], 'Breathing disturbances': [], 'Deep sleep duration': [], 'Duration to sleep': [] , 'Duration to wakeup': [],
 									'HR average': [], 'Light sleep duration': [], 'Rem sleep duration': [], 'RR average': [], 'Sleep score': [], 'Wake up count': [],
@@ -279,19 +235,15 @@ class DatabaseManager(object):
 			self.df_scawatch_intra = pd.DataFrame({'date HR': [], 'Heart Rate': [], 'date Steps':[], 'Steps': [], 'date Calories': [] , 'Calories': []})
 			self.df_scawatch_intra.to_csv(self.scanwatch_intraday, index = False)
 
-		
-
 		try:
 			existing_data_sleepintra = pd.read_csv(self.sleepmat_intraday)
 			self.df_sleep_intra = existing_data_sleepintra 
-
 		except:
 			self.df_sleep_intra =  pd.DataFrame({'startdate':[], 'enddate': [], 'Sleep state':[], 'Heart Rate date': [], 'Heart Rate': [] ,  'Respiration rate date': [],
 			 												'Respiration rate': [] , 'Snoring date': [], 'Snoring': [], 'sdnn_1 date': [], 'sdnn_1': []})
 			self.df_sleep_intra.to_csv(self.sleepmat_intraday, index = False)
 
 		#Closing files
-
 		self.ScaleFile.close()
 		self.ScanWatchfile.close()
 		self.SleepMatFile.close()
@@ -300,9 +252,7 @@ class DatabaseManager(object):
 
 
 	def close_all_cvs_files(self):
-
 		#Closing files
-
 		self.ScaleFile.close()
 		self.ScanWatchfile.close()
 		self.SleepMatFile.close()
@@ -327,12 +277,11 @@ class DatabaseManager(object):
 			ref_column_name = 'date HR'
 		elif cvs_from == 'Intra_sleep':
 			file_name = self.sleepmat_intraday
-			ref_column_name = 'startdate'
+			ref_column_name = 'start_date'
 		
 		# Open the corresponding data file
 		df = pd.read_csv(file_name, header = 0, delimiter=',')
 		#Converting the dates to datetime
-		#print(HOLA)
 		if cvs_from == 'Intra_watch':
 			df[ref_column_name] = pd.to_datetime(df[ref_column_name], unit = 's') 
 		elif cvs_from == 'Intra_sleep':
@@ -344,26 +293,14 @@ class DatabaseManager(object):
 		df = df.sort_values(by = ref_column_name, ascending=False)
 		df = df.drop_duplicates(subset=ref_column_name, keep = 'first')
 		
-
-	
-
 		if cvs_from == 'Intra_watch':
 			df[ref_column_name] = df[ref_column_name].apply(lambda x: x.timestamp() if pd.notnull(x) else np.nan)
 		if cvs_from == 'Intra_sleep':
 			df[ref_column_name] = df[ref_column_name].apply(lambda x: x.timestamp() if pd.notnull(x) else np.nan)
-		
-			
-
-
 
 		#Info to csv file
 		df.to_csv(file_name, index=False)
 		#file_name.close()
-	
-	
-
-
-
 
 	def set_user(self, p):
 
@@ -380,32 +317,14 @@ class DatabaseManager(object):
 		return self.UserStatus
 
 	def save_user(self):
-
-		print('In save_user')
-
 		#Check the user in the database
-
 		self.UserStatus = self.check_user()
-		print('UserStatus', self.UserStatus)
-
 		path = self.PH
-
 		if not self.UserStatus['registered']:
-
-			print('Here not registered')
-
-			#path = self.PH
-
 			if os.path.exists(path + "/Users.csv"):
-
 				f = open(path + "/Users.csv", 'a')
-
-				#save new user information
-				#rint()
-
 				f.write(self.user['id']+";"+(str(self.date.year) +"-"+ str(self.date.month)+"-"+ str(self.date.day))+'\n'
                     )
-
 		else:
 			print('registered')
 
@@ -445,7 +364,6 @@ class DatabaseManager(object):
 			return{"registered" : False, "id" : self.user['id']}
 
 		else:
-
 			print('No Exists')
 
 			f = open(path + "/Users.csv", 'w+')
@@ -455,7 +373,3 @@ class DatabaseManager(object):
 		
 	def delete_usage(self):
 		pass
-
-
-
-

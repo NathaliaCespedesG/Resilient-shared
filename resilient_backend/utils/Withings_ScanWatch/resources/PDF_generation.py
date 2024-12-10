@@ -26,11 +26,9 @@ class PDF_generation(object):
 					id_nhs : None, 
 					report_type : None
 					):
-
-
 		#creating the database object
 		self.path = path
-		#print('path', self.path)
+
 		# Values for building the table
 		self.report_type = report_type
 		self.day_hr = day_hr
@@ -42,10 +40,6 @@ class PDF_generation(object):
 		self.weight = weight
 		self.c_date = c_date
 		self.e_date = e_date
-		
-
-		print(self.c_date)
-		print(type(self.c_date))
 
 		#Current year
 		self.current_year =str(datetime.datetime.now().year)
@@ -85,7 +79,6 @@ class PDF_generation(object):
 
 
 	def averages_data(self, val1, val2, val3, type_d):
-
 		val1 = np.array(val1, dtype=float)
 		val1[np.isnan(val1)] = np.nan
 
@@ -95,14 +88,11 @@ class PDF_generation(object):
 		val3 = np.array(val3, dtype=float)
 		val3[np.isnan(val3)] = np.nan
 
-		print(val1)
 		if val1.size == 0 or (np.all(np.isnan(val1))) or (np.all(val1==0)):
-			print('Empty values: No mean')
 			self.mean_val1 = 'N/A'
 			self.sd_val1 = ''
 			self.var_1 = self.mean_val1
 		else:
-			print('Mean values')
 			val1 = [value for value in val1 if value is not None and value != 0 and not math.isnan(value)]
 			self.mean_val1 = math.floor(np.mean(val1))
 			#self.mean_val1 = str("{:.2f}".format(self.mean_val1))
@@ -111,7 +101,6 @@ class PDF_generation(object):
 			self.sd_val1 = str("{:.1f}".format(self.sd_val1))
 			#self.var_1 = self.mean_val1 + " ± "+ self.sd_val1
 			if type_d == "hr" or type_d =="nhr":
-	
 				if self.mean_val1 > 90 or self.mean_val1 <51:
 					self.mean_val1 = str(self.mean_val1) + '*'
 				else:
@@ -131,16 +120,12 @@ class PDF_generation(object):
 				elif self.mean_val1 > 30 :
 					self.mean_val1 = str(self.mean_val1) + '\n Severe'
 
-
-
 			self.var_1 = self.mean_val1
-
 
 		if val2.size == 0 or (np.all(np.isnan(val2))) or (np.all(val2==0)):
 			self.mean_val2 = 'N/A'
 			self.sd_val2 = ''
 			self.var_2 = self.mean_val2
-
 		else:
 			val2 = [value for value in val2 if value is not None and value != 0 and not math.isnan(value)]
 			self.mean_val2 = math.floor(np.mean(val2))
@@ -186,10 +171,6 @@ class PDF_generation(object):
 			#self.var_2 = self.mean_val2
 
 		return(self.var_1, self.var_2, self.var_3)
-
-
-
-
 
 	def sd_comparisson(self, val1, val2, col, row):
 
@@ -237,20 +218,17 @@ class PDF_generation(object):
 
 	def create_title_page(self, canvas, doc):
 		styles = getSampleStyleSheet()
-		print('Creating title page')
 
 		# Draw additional text
 		text = "Study ID: " + self.id + "                       "+ "Date: "+ self.c_date +" - "+ self.e_date 
 		canvas.setFont("Arial", 11)
 		canvas.drawString(doc.leftMargin + 8 * cm , doc.height + 2.3 * cm, text)
-		print('Drawn text')
 
 		#Draw the years in the upper part of the report
 
 		text_year = self.current_year
 		canvas.setFont("Arial", 11)
 		canvas.drawString(doc.leftMargin + 16.5 * cm , doc.height + 4.2* cm, text_year)
-		print('Drawn year')
 
 		# Draw NEWS2 text
 
@@ -260,12 +238,9 @@ class PDF_generation(object):
 			canvas.drawString(doc.leftMargin + 10.5 * cm , doc.height - 3.8* cm, text1)
 		if self.report_type == 0:
 			canvas.drawString(doc.leftMargin + 10.5 * cm , doc.height - 2.4* cm, text1)
-		print('Drawn NEWS2 text')
 
 		#Draw sd text
-
 		canvas.setFont("Arial", 7.3)
-
 		if self.report_type == 1:
 			text_sd = 'A value highlighted in orange indicates a change of 1 SD from the previous week'
 			canvas.drawString(doc.leftMargin - 1.5 * cm , doc.height - 3.8* cm, text_sd)
@@ -274,11 +249,7 @@ class PDF_generation(object):
 			text_sd = 'A value highlighted in orange indicates a change of 1 SD from the average of the previous 3 months.' 
 			canvas.drawString(doc.leftMargin - 1.5 * cm , doc.height - 2.4* cm, text_sd)
 			
-		print('Drawn sd text')
-
-		
 		canvas.setFont("Arial", 7.3)
-		
 		if self.report_type == 1:
 			text_2sd = 'A value highlighted in red indicates a change of 2 or more SD from the previous week'
 			canvas.drawString(doc.leftMargin - 1.5 * cm , doc.height - 4.1* cm, text_2sd)
@@ -287,8 +258,6 @@ class PDF_generation(object):
 			text_sd = 'A value highlighted in red indicates a change of 2 or more SD from the average of the previous 3 months.'
 			canvas.drawString(doc.leftMargin - 1.5 * cm , doc.height - 2.8* cm, text_sd)
 			
-
-
 		# Add the watermark image
 		if self.id.endswith("s"):
 			watermark_image = Image(self.imgs_path + "/surrey_logo_sp.jpg", width = 7*cm, height = 4*cm)
@@ -298,37 +267,25 @@ class PDF_generation(object):
 			watermark_image.drawOn(canvas, doc.leftMargin - 2.6*cm , doc.height + 2.2*cm)
 
 		
-		print('Drawn watermark image')
-
-		
-
 		#Add the Surrey logo project watermark
-
 		surrey_image = Image(self.imgs_path + "/surrey_logo.jpg", width = 2.143*cm, height = 1.058*cm)
 		surrey_image.drawOn(canvas, doc.leftMargin - 0.5*cm , 1*cm)
-
 
 		#Add the Imperial logo project watermark
 		imperial_image = Image(self.imgs_path + "/Imperial_logo.jpg", width = 4.021*cm, height = 1.058*cm)
 		imperial_image.drawOn(canvas, doc.leftMargin + 1.943*cm , 1*cm)
 
-
 		#Add the NIHR project watermark
 		nihr_image = Image(self.imgs_path + "/nihr_logo.jpg", width = 5.979*cm, height = 1.058*cm)
 		nihr_image.drawOn(canvas, doc.leftMargin + 6.264*cm , 1*cm )
-
-
 
 		#Add the EPSCR project watermark
 		epscr_image = Image(self.imgs_path + "/epsrc_logo.jpg", width = 4.233*cm, height = 1.058*cm)
 		epscr_image.drawOn(canvas, doc.leftMargin + 12.543*cm , 1*cm )
 
-		
-
 		#Semi-transparent white rectangle to simulate opacity in the EPSCR logo
 		canvas.setFillColorRGB(1, 1, 1, 0)  # White with specified opacity (0.5)
 		canvas.rect(doc.leftMargin + 8*cm , 1*cm, 9.5*cm , 2.2*cm, fill=True, stroke=False)
-
 
 		#doc.height - 25.2*cm
 		title_text = "RESILIENT: Weekly Health Report"
@@ -340,10 +297,6 @@ class PDF_generation(object):
 		title = Paragraph(title_text, title_style)
 		title.wrapOn(canvas, doc.width, doc.height)
 		title.drawOn(canvas, doc.leftMargin, doc.height + 3 * cm )
-		print('Drawn title')
-
-		
-
 
 
 	def document_generation(self):
@@ -351,17 +304,13 @@ class PDF_generation(object):
 		document_file = self.path + "/"+ (self.id +"_report.pdf")
 
 		# Data for the table
-		print('self day hr', self.day_hr)
 		hr_c, hr_p, hr_m = self.averages_data(self.day_hr[0],self.day_hr[1], self.day_hr[2], type_d = 'hr')
 		nhr_c, nhr_p, nhr_m = self.averages_data(self.night_hr[0],self.night_hr[1], self.night_hr[2], type_d = 'nhr' )
 		rr_c, rr_p, rr_m = self.averages_data(self.night_rr[0],self.night_rr[1], self.night_rr[2], type_d = 'rr' )
 		steps_c, steps_p, steps_m = self.averages_data(self.steps[0],self.steps[1], self.steps[2], type_d = 'steps' )
 		sd_c,sd_p, sd_m = self.averages_data(self.sleep_duration[0],self.sleep_duration[1], self.sleep_duration[2], type_d = 'sd')
 		sa_c,sa_p, sa_m  = self.averages_data(self.sleep_apnoea[0],self.sleep_apnoea[1],self.sleep_apnoea[2], type_d = 'sa')
-		print('Froooooooom graph')
-		print(self.weight)
 		w_c, w_p, w_m = self.averages_data(self.weight[0], self.weight[1], self.weight[2], type_d = 'weight')
-
 
 		if self.report_type == 1:
 			# Create a list of data for the table
@@ -397,20 +346,14 @@ class PDF_generation(object):
 		image_height = 2.17 * inch
 		spacing = 0.4 * cm
 
-		print('before doc')
 		# Create a canvas and set the size
 		doc = SimpleDocTemplate(document_file, pagesize = A4, title="Resilient")
-		print('after doc')
 		# Add the title page to the document
 		styles = getSampleStyleSheet()
-		print('after styles')
 		doc.build([Paragraph("", styles['Normal'])], onFirstPage=self.create_title_page)
-
-		print('after create_title_page')
 
 		# Create a table object and set its properties
 		table = Table(data)
-		print('after table')
 		table.setStyle(TableStyle([
     		('BACKGROUND', (0, 0), (0, -1), colors.lightblue),
     		('BACKGROUND', (0, 0), (-1, 0), colors.lightblue),
@@ -421,38 +364,28 @@ class PDF_generation(object):
     		('BOTTOMPADDING', (0, 0), (-1, 0), 10),
     		('GRID', (0, 0), (-1, -1), 1, colors.black),
 		]))
-		print('after table style')
 		# Changing the font size for row 1
 		table_style = TableStyle([('FONTSIZE', (0, 0), (-1, 0), 10)])
-		print('after table style 2')
 		table.setStyle(table_style)
-		print('after table style 3')
 
 		# Changing the font size for column 1
 		for i in range(1, len(data)):
 			table_style = TableStyle([('FONTSIZE', (0, i), (0, i), 10)])
 			table.setStyle(table_style)
 
-		print('after table style 4')
 		#conditionals for the table
 		m = self.conditional_highlighting(self.day_hr, self.night_hr, self.night_rr,
 										  self.steps, self.weight, self.sleep_duration, self.sleep_apnoea,
 										  )
-		print('after conditional')
 		highlight_table_style = TableStyle(m)
-		print('after highlight')
 		table.setStyle(highlight_table_style)
-		print('after table style 5')
 		spacer1 = Spacer(3, spacing)
 		spacer2 = Spacer(10, spacing)
-
 
 		# Create a list to hold the images
 		image_list = []
 
-
 		# Add the images to the list
-
 		for image_path in images:
 			image = Image(image_path, width=image_width, height=image_height)
 			image_list.append(image)
@@ -462,10 +395,7 @@ class PDF_generation(object):
 
 		# Build the PDF document
 		elements = [spacer1,table, spacer2, spacer2, spacer1, image_table]
-		print('after elements')
 		doc.build(elements)
-		print('after doc.build')
-
 
 	@classmethod
 	def main(cls):

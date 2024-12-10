@@ -100,8 +100,6 @@ class DatabaseServer_csv(object):
     def upload_device_info(self):
         url= 'http://127.0.0.1:8000/api/devices/'
         current_users = {key: value for key, value in self.id_username_dict.items() if value in self.id_available }
-        print(current_users)
-        #print(HOla)
         for i in range(len(self.id_available)):
             path = '/home/nathalia/Withings_ScanWatch/Withings_ScanWatch/db/General/'+ str(self.id_available[i]) + '/Devices.csv'
            
@@ -235,9 +233,6 @@ class DatabaseServer_csv(object):
                                 "hr_min": hr_max,
                             }
                             
-                            print(data)
-                            print('*********************')
-                            print(self.id_available[i])
                             response = requests.post(url, json=data)
 
     def get_report_id(self, username = None):

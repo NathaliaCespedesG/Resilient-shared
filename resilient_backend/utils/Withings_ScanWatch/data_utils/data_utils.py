@@ -134,17 +134,7 @@ class Data_Handler(object):
 
 		# If you have NaN values, you can replace them in the new_weights list
 		new_weights = [np.nan if np.isnan(x) else round(x, 2) for x in new_weights]
-
-
-		#print("New Dates:", new_d)
-		#print("New Weights:", new_weights)
-		#print("New Dates:", len(new_d))
-		#print("New Weights:", len(new_weights))
-
 		return(new_d, new_weights)
-
-
-
 
 	def unique_values_sleep(self, dates, start_date, end_date, values):
 
@@ -185,17 +175,10 @@ class Data_Handler(object):
 		return(unique_dates, unique_y, positions)
 
 	def hr_average_basedon_sleep(self, dates = None, HR = None, startdates = None, enddates = None):
-
 		# Initialize a dictionary to store mean HR values for each key
 		mean_hr_dict = {}
 
-		#print('IN FILLIIIIIIIIIIIING')
-		#print(len(startdates))
-		#print(len(dates))
-
-
 		try:
-
 			if len(startdates) < len(dates):
 
 				missing_days = len(dates) - len(startdates)
@@ -212,7 +195,6 @@ class Data_Handler(object):
 			for key in dates:
 				timestamps = [int(ts) for ts in dates[key]]
 				hr_values = HR[key]
-				#print(key)
 
 				# Get the corresponding start and end dates for this key using the key index
 				#startdate = startdates[key] #.replace(tzinfo='UTC')
@@ -247,15 +229,9 @@ class Data_Handler(object):
 					mean_hr_dict[key] = None
 			
 				rounded_values_list = [round(value)  if value is not None else None for value in mean_hr_dict.values()]
-
-
 		except IndexError:
-			
 			print("Warning ! : Startdates list list is empty.")
 			rounded_values_list = np.full(7, np.nan)
-
-		
-			
 
 		#print(rounded_values_list)
 		return(rounded_values_list)
@@ -278,18 +254,13 @@ class Data_Handler(object):
 
 			# Initialize the first interval's start time
 			#try:
-			#print('Here')
 			current_interval_start = timestamps[0]
-			#print(current_interval_start)
 			#except:
 			#current_interval_start = None
 
 			# Initialize variables to calculate the sum and count within each interval
 			interval_sum = 0
 			interval_count = 0
-
-			#print('----------------------------------------------------------')
-			#print(current_interval_start)
 
 			if current_interval_start is not None:
 
@@ -337,8 +308,6 @@ class Data_Handler(object):
 
 
 	def halfhour_calculation(self, timestamps,values):
-
-
 		if not timestamps:
 			mean_hr = float('nan')
 
@@ -368,12 +337,7 @@ class Data_Handler(object):
 					current_index += 1
 
 			timestamps_at_intervals, values_at_intervals = self.hr_filtering(timestamps_at_intervals,values_at_intervals)
-
-			#print('val at intervals', values_at_intervals)
 			timestamps_repti = [arrow.get(ts) for ts in timestamps_at_intervals]
-			#print('timestamps',timestamps_repti)
-
-			#print('------------------------------------')
 
 			if values_at_intervals:
 				mean_hr = sum(values_at_intervals) / len(values_at_intervals)
@@ -526,20 +490,10 @@ class Data_Handler(object):
 	
 	# The following function is to understand the weekly devices usage during the week
 	def usage_understanding(self, start_date = None, end_date = None, start_date_scale = None, sleep_u = None, watch_u = None, scale_u = None):
-
-		print('USAAAAAAAAAAGE')
-
 		usage = {}
 
 		day_diff = (end_date - start_date).days + 1
 		day_diff_scale = (end_date - start_date_scale).days + 1
-
-
-		print(sleep_u)
-		print(watch_u)
-		print(scale_u)
-		print(day_diff)
-		print(day_diff_scale)
 
 		# Counting values None and NaN values
 		total_sleep_nan = [value for value in sleep_u if value is None or np.isnan(value) or value == 0]
@@ -580,9 +534,6 @@ class Data_Handler(object):
 		else:
 			usage['Scale'] = 'Low'
 
-
-
-		print(usage)
 		return(usage)
 	
 	def calculate_usage(self, start_date = None, end_date = None, dates = None, values = None, device = None):
