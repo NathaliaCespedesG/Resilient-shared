@@ -45,6 +45,14 @@ class Scale(models.Model):
     bone_mass = models.FloatField(null=True, blank=True)
     fat_mass = models.FloatField(null=True, blank=True)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'device', 'date'],
+                name='scale_unique_user_device_date'
+            )
+        ]
+
 class ScanWatchIntraActivity(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name='scanwatch_intraactivity')
@@ -56,6 +64,14 @@ class ScanWatchIntraActivity(models.Model):
     calories = models.FloatField(null=True, blank=True)
     date_calories = models.FloatField(null=True, blank=True)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'device', 'date_heart_rate'],
+                name='scanwatch_intra_unique_user_device_date_heart_rate'
+            )
+        ]
+
 class ScanWatchSummary(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name='scanwatch_summary')
@@ -66,6 +82,14 @@ class ScanWatchSummary(models.Model):
     steps = models.FloatField(null=True, blank=True)
     hr_max = models.FloatField(null=True, blank=True)
     hr_min = models.FloatField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'device', 'date'],
+                name='scanwatch_summary_unique_user_device_date'
+            )
+        ]
 
 class SleepmatIntraActivity(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -82,6 +106,14 @@ class SleepmatIntraActivity(models.Model):
     snoring = models.FloatField(null=True, blank=True)
     date_sdnn_1 = models.FloatField(null=True, blank=True)
     sdnn_1 = models.FloatField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'device', 'start_date'],
+                name='sleep_intra_unique_user_device_start_date'
+            )
+        ]
 
 class SleepmatSummary(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -116,6 +148,14 @@ class SleepmatSummary(models.Model):
     hr_rr = models.FloatField(null=True, blank=True)
     snoring_episodes = models.FloatField(null=True, blank=True)
     snoring_time = models.FloatField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'device', 'start_date'],
+                name='sleep_summary_unique_user_device_start_date'
+            )
+        ]
 
 
 class Report(models.Model):
