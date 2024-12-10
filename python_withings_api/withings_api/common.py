@@ -432,9 +432,6 @@ class MeasureGetMeasMeasure(ConfiguredBaseModel):
 
 class MeasureGetMeasGroup(ConfiguredBaseModel):
     """MeasureGetMeasGroup."""
-
-    print('In measure tuple')
-
     attrib: MeasureGetMeasGroupAttrib
     category: MeasureGetMeasGroupCategory
     created: ArrowType
