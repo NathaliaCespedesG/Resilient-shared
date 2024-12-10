@@ -127,25 +127,25 @@ class PDF_Usage(object):
             row = [x, z, m, n, l, o, p,j,i,q]
 
             if m == 'low':
-                row[2] = Image('/home/nathalia/Withings_ScanWatch/Withings_ScanWatch/img/low_battery.jpg', width = 10, height = 10)
+                row[2] = Image('img/low_battery.jpg', width = 10, height = 10)
             elif m == 'medium':
-                row[2] = Image('/home/nathalia/Withings_ScanWatch/Withings_ScanWatch/img/medium_battery.jpg', width = 10, height = 10)             
+                row[2] = Image('img/medium_battery.jpg', width = 10, height = 10)             
             elif m == 'high':
-                row[2] = Image('/home/nathalia/Withings_ScanWatch/Withings_ScanWatch/img/high_battery.jpg', width = 10, height = 10)
+                row[2] = Image('img/high_battery.jpg', width = 10, height = 10)
 
             if o == 'low':
-                row[5] = Image('/home/nathalia/Withings_ScanWatch/Withings_ScanWatch/img/low_battery.jpg', width = 10, height = 10)
+                row[5] = Image('img/low_battery.jpg', width = 10, height = 10)
             elif o == 'medium':
-                row[5] = Image('/home/nathalia/Withings_ScanWatch/Withings_ScanWatch/img/medium_battery.jpg', width = 10, height = 10)    
+                row[5] = Image('img/medium_battery.jpg', width = 10, height = 10)    
             elif o == 'high':
-                row[5] = Image('/home/nathalia/Withings_ScanWatch/Withings_ScanWatch/img/high_battery.jpg', width = 10, height = 10)
+                row[5] = Image('img/high_battery.jpg', width = 10, height = 10)
 
             if i == 'low':
-                row[8] = Image('/home/nathalia/Withings_ScanWatch/Withings_ScanWatch/img/low_battery.jpg', width = 10, height = 10)
+                row[8] = Image('img/low_battery.jpg', width = 10, height = 10)
             elif i == 'medium':
-                row[8] = Image('/home/nathalia/Withings_ScanWatch/Withings_ScanWatch/img/medium_battery.jpg', width = 10, height = 10)    
+                row[8] = Image('img/medium_battery.jpg', width = 10, height = 10)    
             elif i == 'high':
-                row[8] = Image('/home/nathalia/Withings_ScanWatch/Withings_ScanWatch/img/high_battery.jpg', width = 10, height = 10)
+                row[8] = Image('img/high_battery.jpg', width = 10, height = 10)
 
             
             data.append(row)
@@ -172,18 +172,14 @@ class PDF_Usage(object):
 
         # Apply additional style to highlighted rows
         for i, row in enumerate(data):
-            #print(row)
-            print(self.conditional_highlight(row))
             if self.conditional_highlight(row):
                 table.setStyle(TableStyle([('BACKGROUND', (0, i), (-1, i), colors.orange)]))
     
-        
         # Add the table to the PDF document
         doc.build([spacer1,table])
 
     @classmethod
     def main(cls):
-        
         a = cls( path = None,
             id_user = None,
             start_date =None,
