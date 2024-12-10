@@ -307,8 +307,6 @@ class AbstractWithingsApi:
         )
         update_params(params, "action", "getmeas")
 
-        #print('Im getting measures from here', params)
-        
         return MeasureGetMeasResponse(
             **self.request(path=self.PATH_MEASURE, params=params)
         )
