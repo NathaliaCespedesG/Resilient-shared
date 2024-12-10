@@ -18,8 +18,6 @@ class WithingsCredentials(View):
             data = json.loads(request.body) # Data tieme status y code 
             # Process the data here
             # For demonstration, we'll just print it and send it back in the response
-            print(data)
-            print(type(data))
             code = data['code']
             state = data['state']
             user_id = data['userId']
@@ -31,8 +29,6 @@ class WithingsCredentials(View):
         except json.JSONDecodeError:
             return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
         
-        
-
     def get(self, request, *args, **kwargs):
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
@@ -45,25 +41,21 @@ class ReportGeneration(View):
             report_type = request.GET.get('report_type')
             username = request.GET.get('username')
             
-            # Assuming the file is in the media directory
-            # file_path = os.path.join('reports/temp_report_files', '007p_report.pdf')
-            
-            # if not os.path.exists(file_path):
-            #     return HttpResponse("File not found.", status=404)
-            
-            # response = FileResponse(open(file_path, 'rb'), content_type='application/pdf')
-            # response['Content-Disposition'] = 'inline; filename="007p_report.pdf"'
-            # return response
-
             #Answer from Resilient generation
-            ## TODO: FINISH IMPLEMENTATION WITH WITHINGS
             report_generator = Resilient()
             report = report_generator.report_generation(report_type = report_type, username = username)
-
+            if report['status'] == 'failed':
+                return JsonResponse({'status': 'error', 'message': 'Report generation failed'}, status=500)
+            
+            if report['type'] == 'one':
+                file_path = os.path.join('db/General/', report['path'])
+                response = FileResponse(open(file_path, 'rb'), content_type='application/pdf')
+                response['Content-Disposition'] = 'inline; filename="report.pdf"'
+                return response
+            
             return JsonResponse({'status': 'success', 'report': report})
         
         except json.JSONDecodeError:
-            
             return JsonResponse({'status': 'error', 'message': 'Invalid JSON format'}, status=400)
         
         except ValueError as e:
