@@ -811,8 +811,6 @@ class Devices_OAuth2flow(object):
 
 
 	def usage_levels(self):
-		print('Here in usages')
-
 		#Date selection according to the type of the report
 		if self.report_type == 1:
 			start_date = arrow.utcnow().shift(days = self.starting_day_c) 
@@ -828,32 +826,22 @@ class Devices_OAuth2flow(object):
 			start_date = arrow.utcnow().shift(days = self.starting_day_p) 
 			end_date = arrow.utcnow().shift(days = self.ending_day_p)
 
-
 			start_date_scale = arrow.utcnow().shift(days = self.starting_day_p-8) 
-
-			#print('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
-			#print(start_date_scale)
 
 			#Values from last week for scanwatch and sleepmat
 			sleep_u = self.current_sleep_hr
 			watch_u = self.current_daily_hr
 
-			#print(watch_u)
-			#print(self.final_hr)
-
 			#Values for the last two weeks of scale to calculate the usage 
 			scale_u = self.data_utils.values_dates_intersection(dates = self.monthly_scale_data['date'], start_date = start_date_scale, end_date = end_date, values = self.weight_m)
-	
 
 		# Usage
-	
 		usage = self.data_utils.usage_understanding(start_date = start_date, end_date = end_date,  start_date_scale = start_date_scale,  sleep_u = sleep_u, watch_u = watch_u, scale_u = scale_u)
 		
 		#Battery 
 		self.battery_report = self.battery
 
 		#Last date of usage
-
 		try:
 			watch_last_usage =  self.activity_data['date'][-1]
 		except IndexError:
@@ -872,10 +860,6 @@ class Devices_OAuth2flow(object):
 		
 
 		self.last_day_use = {'Watch': watch_last_usage, 'Scale': scale_last_usage, 'Sleep': sleep_last_usage} 
-		print(usage)
-		print(self.last_day_use)
-		print(self.battery)
-
 
 		self.database.SM.load_usage( user_id = self.id_user, start_date = start_date, end_date = end_date, sleep_usage = usage['Sleep Mat'], sleep_battery = self.battery['Sleep Monitor'], sleep_lastday = self.last_day_use['Sleep'], watch_usage = usage['Watch'],
 									 watch_battery = self.battery['Activity Tracker'], watch_lastday = self.last_day_use['Watch'], scale_usage = usage['Scale'], scale_battery = self.battery['Scale'], scale_lastday = self.last_day_use['Scale'])
